@@ -1,0 +1,24 @@
+{
+  "originHash" : "64575afa1f37e68279aa5312fffb163e263fb4261134173071026e8c9fb775a8",
+  "pins" : [
+    {
+      "identity" : "languagemanager-ios",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Abedalkareem/LanguageManager-iOS.git",
+      "state" : {
+        "revision" : "aa85ea90cc88fa9f9eadcd81bbd9382ad7c507cf",
+        "version" : "1.3.0"
+      }
+    },
+    {
+      "identity" : "sdwebimage",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/SDWebImage/SDWebImage",
+      "state" : {
+        "revision" : "449e8f8f10377f620db8ad22ea81208eecf6325f",
+        "version" : "5.21.6"
+      }
+    }
+  ],
+  "version" : 3
+}

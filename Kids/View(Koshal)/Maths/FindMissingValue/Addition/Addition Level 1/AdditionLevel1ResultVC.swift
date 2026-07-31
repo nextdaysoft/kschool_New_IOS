@@ -1,0 +1,204 @@
+//
+//  AdditionLevel1ResultVC.swift
+//  KSchool
+//
+//  Created by Koshal Singh on 08/06/26.
+//
+
+import UIKit
+
+class AdditionLevel1ResultVC: BaseViewController {
+
+    @IBOutlet weak var backBtn: UIButton!
+    @IBOutlet weak var HeaderView: UIView!
+    @IBOutlet weak var statusView: UIView!
+    @IBOutlet weak var titelLbl: UILabel!
+    
+    @IBOutlet weak var scoreBGView: UIView!
+    @IBOutlet weak var scoreLbl: UILabel!
+    @IBOutlet weak var nextBtn: UIButton!
+    
+    
+    @IBOutlet weak var bgView1: UIView!
+    @IBOutlet weak var bgView2: UIView!
+    @IBOutlet weak var bgView3: UIView!
+    @IBOutlet weak var bgView4: UIView!
+    @IBOutlet weak var bgView5: UIView!
+    @IBOutlet weak var bgView6: UIView!
+    @IBOutlet weak var bgView7: UIView!
+    @IBOutlet weak var bgView8: UIView!
+    @IBOutlet weak var bgView9: UIView!
+    @IBOutlet weak var bgView10: UIView!
+    
+    
+    @IBOutlet var lbl1Array: [UILabel]!
+    @IBOutlet var lbl2Array: [UILabel]!
+    @IBOutlet var lbl3Array: [UILabel]!
+    @IBOutlet var lbl4Array: [UILabel]!
+    
+   
+    @IBOutlet var ans1Array: [UILabel]!
+    @IBOutlet var ans2Array: [UILabel]!
+    
+    @IBOutlet var ansBg1Array: [UIView]!
+    @IBOutlet var ansBg2Array: [UIView]!
+   
+
+    @IBOutlet var resultImgArray: [UIImageView]!
+    @IBOutlet var signArray: [UILabel]!
+
+    var mode: AddSubMode = .addition
+    var score: Int = 0
+    var results: [AddSubResult] = []
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
+        setup()
+        applyTheme()
+        
+        scoreLbl.text = "Score : \(score) / 10"
+        setupResults()
+        
+        bgView1.layer.cornerRadius = 10
+        bgView2.layer.cornerRadius = 10
+        bgView3.layer.cornerRadius = 10
+        bgView4.layer.cornerRadius = 10
+        bgView5.layer.cornerRadius = 10
+        bgView6.layer.cornerRadius = 10
+        bgView7.layer.cornerRadius = 10
+        bgView8.layer.cornerRadius = 10
+        bgView9.layer.cornerRadius = 10
+        bgView10.layer.cornerRadius = 10
+        
+        for view in ansBg1Array {
+            view.layer.cornerRadius = 5
+            view.clipsToBounds = true
+        }
+
+        for view in ansBg2Array {
+            view.layer.cornerRadius = 5
+            view.clipsToBounds = true
+        }
+        
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        applyTheme()
+    }
+    
+    func setup(){
+        let config = UIImage.SymbolConfiguration(pointSize: 26, weight: .medium)
+        let img = UIImage(systemName: "arrow.backward.circle", withConfiguration: config)
+        backBtn.setImage(img, for: .normal)
+        backBtn.tintColor = #colorLiteral(red: 0.1718951762, green: 0.212508589, blue: 0.3281655014, alpha: 1)
+        nextBtn.layer.cornerRadius = 6
+        scoreBGView.layer.cornerRadius = 6
+    }
+    
+    func applyTheme() {
+
+        if UserDefaults.standard.bool(forKey: "WhiteTheme") {
+
+            HeaderView.backgroundColor = .white
+            statusView.backgroundColor = .white
+
+            scoreBGView.backgroundColor = .white
+
+            nextBtn.backgroundColor = .white
+            nextBtn.setTitleColor(.black, for: .normal)
+
+        } else {
+
+            let color = ColorManager.randomColor()
+
+            HeaderView.backgroundColor = color
+            statusView.backgroundColor = color
+
+            scoreBGView.backgroundColor = color
+
+            nextBtn.backgroundColor = color
+            nextBtn.setTitleColor(.white, for: .normal)
+        }
+    }
+
+    func saveLevelResult() {
+
+        let percentage = Int((Double(score) / 10.0) * 100.0)
+
+        UserDefaults.standard.set(true,
+                                  forKey: "additionLevel1Completed")
+
+        UserDefaults.standard.set(percentage,
+                                  forKey: "additionLevel1Percentage")
+
+        UserDefaults.standard.synchronize()
+    }
+    
+    func setupResults() {
+
+        for i in 0..<results.count {
+
+            let data = results[i]
+
+            let left = "\(data.leftNumber)"
+            let right = "\(data.rightNumber)"
+
+            lbl2Array[i].text = left
+            lbl4Array[i].text = right
+
+            signArray[i].text = data.isSign ? "+" : "-"
+
+            // ANSWER
+            let answer = Int(data.userAnswer) ?? 0
+            let formatted = String(format: "%02d", answer)
+
+            ans1Array[i].text = String(formatted[formatted.startIndex])
+            ans2Array[i].text = String(formatted[formatted.index(after: formatted.startIndex)])
+
+            // RESULT IMAGE
+            resultImgArray[i].image = data.isCorrect
+                ? UIImage(named: "check mark")
+                : UIImage(named: "close")
+
+            // COLOR
+            let color = data.isCorrect ? UIColor.systemGreen : UIColor.systemRed
+
+            ansBg1Array[i].backgroundColor = color
+            ansBg2Array[i].backgroundColor = color
+
+            // SHOW ANSWER LABELS
+            ansBg1Array[i].isHidden = false
+            ans1Array[i].isHidden = false
+
+            // HIDE UNUSED LABELS
+            lbl1Array[i].isHidden = true
+            lbl3Array[i].isHidden = true
+        }
+    }
+    
+    @IBAction func backTapBtn(_ sender: UIButton) {
+
+        saveLevelResult()
+
+        if let vc = navigationController?.viewControllers.first(where: {
+            $0 is AdditionLevelMenuVC
+        }) {
+            navigationController?.popToViewController(vc, animated: true)
+        }
+    }
+    
+    @IBAction func nextTap(_ sender: UIButton) {
+
+        saveLevelResult()
+
+        if let vc = navigationController?.viewControllers.first(where: {
+            $0 is AdditionLevelMenuVC
+        }) {
+            navigationController?.popToViewController(vc, animated: true)
+        }
+    }
+    
+    
+}

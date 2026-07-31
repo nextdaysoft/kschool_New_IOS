@@ -1,0 +1,86 @@
+//
+//  ListenAndWatchResultVC.swift
+//  KSchool
+//
+//  Created by Koshal Singh on 04/06/26.
+//
+
+import UIKit
+import SDWebImage
+
+class ListenAndWatchResultVC: BaseViewController {
+
+    @IBOutlet weak var nextBtn: UIButton!
+    @IBOutlet weak var backBtn: UIButton!
+    @IBOutlet weak var HeaderView: UIView!
+    @IBOutlet weak var statusView: UIView!
+    @IBOutlet weak var gifImage: UIImageView!
+    @IBOutlet weak var titelLbl: UILabel!
+    
+    var finalScore: Int = 0
+    var levelKey = "letterLevel1Completed"
+    var titleText = ""
+    var menuVCType: UIViewController.Type?
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        setup()
+        
+        titelLbl.text = titleText
+        
+        if let url = Bundle.main.url(forResource: "celebration", withExtension: "gif") {
+            gifImage.sd_setImage(with: url)
+        }
+    }
+
+    
+    func setup(){
+        let color = ColorManager.randomColor()
+        let config = UIImage.SymbolConfiguration(pointSize: 26, weight: .medium)
+        let img = UIImage(systemName: "arrow.backward.circle", withConfiguration: config)
+        backBtn.setImage(img, for: .normal)
+        backBtn.tintColor = #colorLiteral(red: 0.1718951762, green: 0.212508589, blue: 0.3281655014, alpha: 1)
+        HeaderView.backgroundColor = color
+        statusView.backgroundColor = color
+        nextBtn.layer.cornerRadius = 6
+        nextBtn.backgroundColor = color
+    }
+
+    @IBAction func backTapBtn(_ sender: UIButton) {
+
+        UserDefaults.standard.set(
+            true,
+            forKey: levelKey
+        )
+
+        if let targetType = menuVCType,
+           let menuVC = navigationController?
+            .viewControllers
+            .first(where: { type(of: $0) == targetType }) {
+
+            navigationController?.popToViewController(
+                menuVC,
+                animated: true
+            )
+        }
+    }
+
+    @IBAction func nextTapBtn(_ sender: UIButton) {
+
+        UserDefaults.standard.set(
+            true,
+            forKey: levelKey
+        )
+
+        if let targetType = menuVCType,
+           let menuVC = navigationController?
+            .viewControllers
+            .first(where: { type(of: $0) == targetType }) {
+
+            navigationController?.popToViewController(
+                menuVC,
+                animated: true
+            )
+        }
+    }
+}
