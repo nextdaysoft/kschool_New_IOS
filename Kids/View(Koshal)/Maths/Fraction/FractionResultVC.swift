@@ -109,11 +109,8 @@ class FractionResultVC: BaseViewController {
 
             HeaderView.backgroundColor = .white
             statusView.backgroundColor = .white
-
             scoreBGVIew.backgroundColor = .white
-
             nextBtn.backgroundColor = .white
-            nextBtn.setTitleColor(.black, for: .normal)
 
         } else {
 
@@ -123,9 +120,7 @@ class FractionResultVC: BaseViewController {
             statusView.backgroundColor = color
 
             scoreBGVIew.backgroundColor = color
-
             nextBtn.backgroundColor = color
-            nextBtn.setTitleColor(.white, for: .normal)
         }
     }
     

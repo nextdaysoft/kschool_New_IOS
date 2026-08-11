@@ -57,7 +57,6 @@ class GuessTheAnimalCarnivoresShowVC: BaseViewController, AVSpeechSynthesizerDel
         
         setup()
         
-       
         
         let tap1 = UITapGestureRecognizer(target: self, action: #selector(selectOption(_:)))
         let tap2 = UITapGestureRecognizer(target: self, action: #selector(selectOption(_:)))
@@ -65,18 +64,11 @@ class GuessTheAnimalCarnivoresShowVC: BaseViewController, AVSpeechSynthesizerDel
         let tap4 = UITapGestureRecognizer(target: self, action: #selector(selectOption(_:)))
 
         
-        nextBtn.layer.cornerRadius = 10
-        nextBtn.backgroundColor = ColorManager.randomColor()
-        nextBtn.layer.borderColor = UIColor.black.cgColor
-      
-        
         view1.layer.cornerRadius = 10
         view2.layer.cornerRadius = 10
         view3.layer.cornerRadius = 10
         view4.layer.cornerRadius = 10
-        
-        scoreBGVIew.layer.cornerRadius = 10
-        
+      
         view1.addGestureRecognizer(tap1)
         view2.addGestureRecognizer(tap2)
         view3.addGestureRecognizer(tap3)
@@ -96,6 +88,9 @@ class GuessTheAnimalCarnivoresShowVC: BaseViewController, AVSpeechSynthesizerDel
         backBtn.tintColor = #colorLiteral(red: 0.1718951762, green: 0.212508589, blue: 0.3281655014, alpha: 1)
         HeaderView.backgroundColor = color
         statusView.backgroundColor = color
+        nextBtn.layer.cornerRadius = 6
+        nextBtn.backgroundColor = color
+        scoreBGVIew.layer.cornerRadius = 6
     }
     
     func setupQuestion() {

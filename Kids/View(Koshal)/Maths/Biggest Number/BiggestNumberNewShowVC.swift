@@ -49,6 +49,8 @@ class BiggestNumberNewShowVC: BaseViewController {
     
     @IBOutlet weak var LevelLbl: UILabel!
     
+    @IBOutlet weak var pdfBtn: UIButton!
+    
     var isBiggestMode: Bool = true
     
     var levelNumber: Int = 1
@@ -100,7 +102,7 @@ class BiggestNumberNewShowVC: BaseViewController {
         view3.layer.cornerRadius = 10
         view4.layer.cornerRadius = 10
         
-        scoreBGVIew.layer.cornerRadius = 10
+        scoreBGVIew.layer.cornerRadius = 6
         
         if isBiggestMode {
             titelLbl.text = "Biggest Number".localiz()
@@ -132,11 +134,12 @@ class BiggestNumberNewShowVC: BaseViewController {
 
             HeaderView.backgroundColor = .white
             statusView.backgroundColor = .white
-
-            scoreBGVIew.backgroundColor = .white
-
             nextBtn.backgroundColor = .white
-            nextBtn.setTitleColor(.black, for: .normal)
+
+            view1.backgroundColor = .white
+            view2.backgroundColor = .white
+            view3.backgroundColor = .white
+            view4.backgroundColor = .white
 
         } else {
 
@@ -144,11 +147,12 @@ class BiggestNumberNewShowVC: BaseViewController {
 
             HeaderView.backgroundColor = color
             statusView.backgroundColor = color
-
-            scoreBGVIew.backgroundColor = color
-
             nextBtn.backgroundColor = color
-            nextBtn.setTitleColor(.white, for: .normal)
+
+            view1.backgroundColor = ColorManager.randomColor()
+            view2.backgroundColor = ColorManager.randomColor()
+            view3.backgroundColor = ColorManager.randomColor()
+            view4.backgroundColor = ColorManager.randomColor()
         }
     }
     
@@ -164,8 +168,13 @@ class BiggestNumberNewShowVC: BaseViewController {
         rightOrWrongImgView.image = nil
         
         [view1, view2, view3, view4].forEach {
-            $0?.backgroundColor = .white
             $0?.isUserInteractionEnabled = true
+
+            if UserDefaults.standard.bool(forKey: "WhiteTheme") {
+                $0?.backgroundColor = .white
+            } else {
+                $0?.backgroundColor = ColorManager.randomColor()
+            }
         }
 
         let currentQuestion = questions[currentQuestionIndex]
@@ -271,5 +280,161 @@ class BiggestNumberNewShowVC: BaseViewController {
         }
     }
 
+    func createPDF() -> URL? {
+
+        let pdfName = isBiggestMode ? "Biggest Number" : "Smallest Number"
+
+        let pdfURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("\(pdfName).pdf")
+
+        view.layoutIfNeeded()
+
+        let views: [UIView] = [
+            view1,
+            view2,
+            view3,
+            view4
+        ]
+
+        guard let first = views.first else { return nil }
+
+        var captureRect = first.superview!.convert(first.frame, to: view)
+
+        for v in views.dropFirst() {
+            let rect = v.superview!.convert(v.frame, to: view)
+            captureRect = captureRect.union(rect)
+        }
+
+        captureRect = captureRect.insetBy(dx: -15, dy: -15)
+
+        let renderer = UIGraphicsImageRenderer(size: captureRect.size)
+
+        let image = renderer.image { _ in
+
+            let hiddenViews: [UIView] = [
+                HeaderView,
+                statusView,
+                backBtn,
+                pdfBtn,
+                scoreBGVIew,
+                nextBtn,
+                rightOrWrongImgView,
+                titelLbl,
+                texLbl,
+                LevelLbl,
+                questionIndexLabel
+            ]
+
+            hiddenViews.forEach { $0.isHidden = true }
+
+            self.view.layoutIfNeeded()
+
+            self.view.drawHierarchy(
+                in: CGRect(
+                    x: -captureRect.origin.x,
+                    y: -captureRect.origin.y,
+                    width: self.view.bounds.width,
+                    height: self.view.bounds.height
+                ),
+                afterScreenUpdates: true
+            )
+
+            hiddenViews.forEach { $0.isHidden = false }
+
+            self.view.layoutIfNeeded()
+        }
+
+        let pageWidth: CGFloat = 595
+        let pageHeight: CGFloat = 842
+
+        let pdfRenderer = UIGraphicsPDFRenderer(
+            bounds: CGRect(x: 0, y: 0, width: pageWidth, height: pageHeight)
+        )
+
+        do {
+
+            try pdfRenderer.writePDF(to: pdfURL) { context in
+
+                context.beginPage()
+
+                let title = isBiggestMode
+                    ? "Select the Biggest Number."
+                    : "Select the Smallest Number."
+
+                title.draw(
+                    in: CGRect(
+                        x: 20,
+                        y: 20,
+                        width: pageWidth - 40,
+                        height: 35
+                    ),
+                    withAttributes: [
+                        .font: UIFont.boldSystemFont(ofSize: 24),
+                        .foregroundColor: UIColor.black
+                    ]
+                )
+
+                let maxWidth = pageWidth - 40
+                let maxHeight = pageHeight - 90
+
+                let scale = min(
+                    maxWidth / image.size.width,
+                    maxHeight / image.size.height
+                )
+
+                let drawWidth = image.size.width * scale
+                let drawHeight = image.size.height * scale
+
+                image.draw(
+                    in: CGRect(
+                        x: (pageWidth - drawWidth) / 2,
+                        y: 70,
+                        width: drawWidth,
+                        height: drawHeight
+                    )
+                )
+            }
+
+            return pdfURL
+
+        } catch {
+
+            print(error)
+            return nil
+        }
+    }
+    
+    @IBAction func pdfTapBtn(_ sender: UIButton) {
+
+        // ✅ Save current state
+        let wasNextHidden = nextBtn.isHidden
+
+        // ✅ Hide Next button before taking screenshot
+        nextBtn.isHidden = true
+        view.layoutIfNeeded()
+
+        guard let url = createPDF() else {
+
+            nextBtn.isHidden = wasNextHidden
+            view.layoutIfNeeded()
+            return
+        }
+
+        // ✅ Restore original state
+        nextBtn.isHidden = wasNextHidden
+        view.layoutIfNeeded()
+
+        let activityVC = UIActivityViewController(
+            activityItems: [url],
+            applicationActivities: nil
+        )
+
+        if let pop = activityVC.popoverPresentationController {
+            pop.sourceView = sender
+        }
+
+        present(activityVC, animated: true)
+    }
+    
 }
 

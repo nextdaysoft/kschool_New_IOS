@@ -114,8 +114,8 @@ final class LetterTraceCapitalView: UIView {
             return
         }
 
-        // ✅ DIFFERENT SPEED FOR CURSIVE/NORMAL
-        let maxForwardStep = isLoopLetterStyle ? 35 : 18
+        // ✅ FASTER SPEED FOR CURSIVE/NORMAL
+        let maxForwardStep = isLoopLetterStyle ? 50 : 30
 
         let searchRange =
             pointIndex..<min(pointIndex + maxForwardStep, points.count)
@@ -134,7 +134,7 @@ final class LetterTraceCapitalView: UIView {
             }
         }
 
-        // ✅ DIFFERENT DISTANCE FOR CURSIVE/NORMAL
+        // Distance allowed
         let allowedDistance: CGFloat =
             isLoopLetterStyle ? 45 : 30
 
@@ -142,8 +142,8 @@ final class LetterTraceCapitalView: UIView {
             return
         }
 
-        // ✅ DIFFERENT BOOST
-        let traceBoost = isLoopLetterStyle ? 2 : 1
+        // ✅ Faster movement along the letter
+        let traceBoost = isLoopLetterStyle ? 4 : 2
 
         if bestIndex >= pointIndex {
 

@@ -35,14 +35,6 @@ class GuessTheRegulatorySignsResultVC: BaseViewController {
             gifImage.sd_setImage(with: url)
         }
         
-        scoreBGVIew.layer.cornerRadius = 10
-        
-        nextBtn.layer.cornerRadius = 10
-        nextBtn.backgroundColor = ColorManager.randomColor()
-        nextBtn.layer.borderColor = UIColor.black.cgColor
-       
-        
-        
     }
 
     func setup(){
@@ -53,6 +45,9 @@ class GuessTheRegulatorySignsResultVC: BaseViewController {
         backBtn.tintColor = #colorLiteral(red: 0.1718951762, green: 0.212508589, blue: 0.3281655014, alpha: 1)
         HeaderView.backgroundColor = color
         statusView.backgroundColor = color
+        scoreBGVIew.layer.cornerRadius = 6
+        nextBtn.layer.cornerRadius = 6
+        nextBtn.backgroundColor = color
     }
 
     @IBAction func backTapBtn(_ sender: UIButton) {
@@ -70,14 +65,21 @@ class GuessTheRegulatorySignsResultVC: BaseViewController {
 
             let percentage = Int((Double(finalScore) / 10.0) * 100)
 
-            let completedKey = "guessTheRegulatorySignsLevel\(levelNumber)Completed"
-            let percentageKey = "guessTheRegulatorySignsLevel\(levelNumber)Percentage"
+            // ✅ Save completed
+            UserDefaults.standard.set(true, forKey: "guessTheRegulatorySignsLevel\(levelNumber)Completed")
 
-            var levelData = UserDefaults.standard.dictionary(forKey: "guessTheRegulatorySignsLevelData") as? [String: Int] ?? [:]
+            // ✅ Save percentage
+            UserDefaults.standard.set(percentage, forKey: "guessTheRegulatorySignsLevel\(levelNumber)Percentage")
+
+            // ✅ Save menu data
+            var levelData = UserDefaults.standard.dictionary(
+                forKey: "guessTheRegulatorySignsLevelData"
+            ) as? [String: Int] ?? [:]
 
             levelData["\(levelNumber)"] = percentage
 
             UserDefaults.standard.set(levelData, forKey: "guessTheRegulatorySignsLevelData")
+            UserDefaults.standard.synchronize()
         }
 
         if let menuVC = navigationController?.viewControllers.first(

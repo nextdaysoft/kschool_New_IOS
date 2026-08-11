@@ -104,12 +104,6 @@ class MatchTheSeasonVC: BaseViewController {
             label.addGestureRecognizer(pan)
         }
 
-        submitAndNextTapBtn.layer.cornerRadius = 10
-        submitAndNextTapBtn.backgroundColor = ColorManager.randomColor()
-        submitAndNextTapBtn.layer.borderColor = UIColor.black.cgColor
-        
-        
-        
         labelBGView1.layer.cornerRadius = 10
         labelBGView1.backgroundColor = ColorManager.randomColor()
         labelBGView1.layer.borderColor = UIColor.black.cgColor
@@ -146,6 +140,9 @@ class MatchTheSeasonVC: BaseViewController {
         backBtn.tintColor = #colorLiteral(red: 0.1718951762, green: 0.212508589, blue: 0.3281655014, alpha: 1)
         HeaderView.backgroundColor = color
         statusView.backgroundColor = color
+        submitAndNextTapBtn.layer.cornerRadius = 6
+        submitAndNextTapBtn.backgroundColor = color
+        
     }
 
     // MARK: Action

@@ -64,6 +64,8 @@ class FillTheMissingLetterLevel4VC: BaseViewController {
     @IBOutlet weak var HeaderView: UIView!
     @IBOutlet weak var statusView: UIView!
     
+    @IBOutlet weak var pdfBtn: UIButton!
+    
     var wordsData: [(word: String, image: String)] = [
         ("RING", "ring"),
         ("BOOK", "readingBook"),
@@ -91,22 +93,22 @@ class FillTheMissingLetterLevel4VC: BaseViewController {
 
         wordsData.shuffle()
         
-        wordsData.shuffle()
         nextAndSubmitBtn.isHidden = true
-        
+    
         scoreBGView.layer.cornerRadius = 6
-     
+        nameBGView.layer.cornerRadius = 6
+       
         let textBGViews = [
               textBGView1, textBGView2, textBGView3, textBGView4, textBGView5,
               textBGView6, textBGView7, textBGView8, textBGView9, textBGView10,
               textBGView11, textBGView12, textBGView13, textBGView14, textBGView15,
               textBGView16, textBGView17, textBGView18, textBGView19, textBGView20,
               textBGView21, textBGView22, textBGView23, textBGView24, textBGView25,
-              textBGView26, nameBGView,
-              scoreBGView, textBGView, imgBGView
+              textBGView26,
               
           ]
 
+        
           textBGViews.forEach { view in
               view?.layer.cornerRadius = 5
               view?.clipsToBounds = true
@@ -137,11 +139,7 @@ class FillTheMissingLetterLevel4VC: BaseViewController {
             textBGView11, textBGView12, textBGView13, textBGView14, textBGView15,
             textBGView16, textBGView17, textBGView18, textBGView19, textBGView20,
             textBGView21, textBGView22, textBGView23, textBGView24, textBGView25,
-            textBGView26,
-            nameBGView,
-            scoreBGView,
-            textBGView,
-            imgBGView
+            textBGView26
         ]
 
         if UserDefaults.standard.bool(forKey: "WhiteTheme") {
@@ -150,7 +148,6 @@ class FillTheMissingLetterLevel4VC: BaseViewController {
             statusView.backgroundColor = .white
 
             nextAndSubmitBtn.backgroundColor = .white
-            nextAndSubmitBtn.setTitleColor(.black, for: .normal)
 
             cardViews.forEach {
                 $0?.backgroundColor = .white
@@ -164,7 +161,6 @@ class FillTheMissingLetterLevel4VC: BaseViewController {
             statusView.backgroundColor = color
 
             nextAndSubmitBtn.backgroundColor = color
-            nextAndSubmitBtn.setTitleColor(.white, for: .normal)
 
             cardViews.forEach {
                 $0?.backgroundColor = ColorManager.randomColor()
@@ -209,6 +205,90 @@ class FillTheMissingLetterLevel4VC: BaseViewController {
                 button.transform = .identity
                 button.backgroundColor = originalColor
             }
+        }
+    }
+    
+    func createPDF() -> URL? {
+
+        let pdfURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("Fill Missing Letter.pdf")
+
+        view.layoutIfNeeded()
+
+        // Sirf imgBGView ka screenshot
+        let renderer = UIGraphicsImageRenderer(size: imgBGView.bounds.size)
+
+        let image = renderer.image { _ in
+            imgBGView.drawHierarchy(in: imgBGView.bounds, afterScreenUpdates: true)
+        }
+
+        let pageRect = CGRect(x: 0, y: 0, width: 595, height: 842)
+
+        let pdfRenderer = UIGraphicsPDFRenderer(bounds: pageRect)
+
+        do {
+
+            try pdfRenderer.writePDF(to: pdfURL) { context in
+
+                context.beginPage()
+
+                // Title
+                let title = "Fill the Missing Letter"
+                let titleAttr: [NSAttributedString.Key: Any] = [
+                    .font: UIFont.boldSystemFont(ofSize: 24)
+                ]
+
+                let titleSize = title.size(withAttributes: titleAttr)
+
+                title.draw(
+                    at: CGPoint(
+                        x: (pageRect.width - titleSize.width) / 2,
+                        y: 20
+                    ),
+                    withAttributes: titleAttr
+                )
+
+                // Subtitle
+                let subtitle = "Complete the Word"
+                let subtitleAttr: [NSAttributedString.Key: Any] = [
+                    .font: UIFont.systemFont(ofSize: 18)
+                ]
+
+                let subtitleSize = subtitle.size(withAttributes: subtitleAttr)
+
+                subtitle.draw(
+                    at: CGPoint(
+                        x: (pageRect.width - subtitleSize.width) / 2,
+                        y: 55
+                    ),
+                    withAttributes: subtitleAttr
+                )
+
+                // imgBGView
+                let top: CGFloat = 100
+
+                let scale = min(
+                    (pageRect.width - 40) / image.size.width,
+                    (pageRect.height - top - 20) / image.size.height
+                )
+
+                let width = image.size.width * scale
+                let height = image.size.height * scale
+
+                image.draw(in: CGRect(
+                    x: (pageRect.width - width) / 2,
+                    y: top,
+                    width: width,
+                    height: height
+                ))
+            }
+
+            return pdfURL
+
+        } catch {
+
+            print(error)
+            return nil
         }
     }
     
@@ -277,6 +357,22 @@ class FillTheMissingLetterLevel4VC: BaseViewController {
         nextAndSubmitBtn.isHidden = false
 
         lineView.isHidden = true
+    }
+    
+    @IBAction func pdfTapBtn(_ sender: UIButton) {
+
+        guard let pdfURL = createPDF() else { return }
+
+        let activityVC = UIActivityViewController(
+            activityItems: [pdfURL],
+            applicationActivities: nil
+        )
+
+        if let popover = activityVC.popoverPresentationController {
+            popover.sourceView = sender
+        }
+
+        present(activityVC, animated: true)
     }
     
 }

@@ -61,9 +61,8 @@ class BiggestNumberNewResultVC: BaseViewController {
             titelLbl.text = "Smallest Number Result"
         }
         
-        scoreBGVIew.layer.cornerRadius = 10
-        
-        nextBtn.layer.cornerRadius = 10
+        scoreBGVIew.layer.cornerRadius = 6
+        nextBtn.layer.cornerRadius = 6
         
         scoreLabel.text = "Score: \(finalScore) / \(totalScore)"
         
@@ -116,11 +115,7 @@ class BiggestNumberNewResultVC: BaseViewController {
 
             HeaderView.backgroundColor = .white
             statusView.backgroundColor = .white
-
-            scoreBGVIew.backgroundColor = .white
-
             nextBtn.backgroundColor = .white
-            nextBtn.setTitleColor(.black, for: .normal)
 
         } else {
 
@@ -128,11 +123,7 @@ class BiggestNumberNewResultVC: BaseViewController {
 
             HeaderView.backgroundColor = color
             statusView.backgroundColor = color
-
-            scoreBGVIew.backgroundColor = color
-
             nextBtn.backgroundColor = color
-            nextBtn.setTitleColor(.white, for: .normal)
         }
     }
     

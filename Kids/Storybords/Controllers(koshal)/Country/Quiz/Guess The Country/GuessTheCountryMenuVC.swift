@@ -1385,12 +1385,16 @@ class GuessTheCountryMenuVC: BaseViewController {
     
     func updateLevelUI(level: Int, imageView: UIImageView, label: UILabel) {
 
-        let levelData = UserDefaults.standard.dictionary(forKey: "guessTheCountryLevelData") as? [String: Int] ?? [:]
+        let isCompleted = UserDefaults.standard.bool(forKey: "guessTheCountryLevel\(level)Completed")
+        let percentage = UserDefaults.standard.integer(forKey: "guessTheCountryLevel\(level)Percentage")
 
-        if let percentage = levelData["\(level)"] {
+        if isCompleted {
+
             imageView.image = UIImage(named: "done")
             label.text = "\(percentage)%"
+
         } else {
+
             imageView.image = nil
             label.text = ""
         }
@@ -1576,7 +1580,16 @@ class GuessTheCountryMenuVC: BaseViewController {
     
     
     @IBAction func restTapBtn(_ sender: UIButton) {
-        UserDefaults.standard.removeObject(forKey: "guessFlagLevelData")
+
+        UserDefaults.standard.removeObject(forKey: "guessTheCountryLevelData")
+
+        for i in 1...20 {
+            UserDefaults.standard.removeObject(forKey: "guessTheCountryLevel\(i)Completed")
+            UserDefaults.standard.removeObject(forKey: "guessTheCountryLevel\(i)Percentage")
+        }
+
+        UserDefaults.standard.synchronize()
+
         updateLevelImages()
         updateResetVisibility()
     }

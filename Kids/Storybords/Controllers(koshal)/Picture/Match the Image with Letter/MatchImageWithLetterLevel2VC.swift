@@ -44,6 +44,7 @@ class MatchImageWithLetterLevel2VC: BaseViewController {
     @IBOutlet weak var HeaderView: UIView!
     @IBOutlet weak var statusView: UIView!
     
+    @IBOutlet weak var pdfBtn: UIButton!
     
     // MARK: - Variables
     var startView: UIView?
@@ -140,9 +141,7 @@ class MatchImageWithLetterLevel2VC: BaseViewController {
 
             HeaderView.backgroundColor = .white
             statusView.backgroundColor = .white
-
             submitAndNextTapBtn.backgroundColor = .white
-            submitAndNextTapBtn.setTitleColor(.black, for: .normal)
 
             labelBGViews.forEach {
                 $0?.backgroundColor = .white
@@ -154,9 +153,7 @@ class MatchImageWithLetterLevel2VC: BaseViewController {
 
             HeaderView.backgroundColor = color
             statusView.backgroundColor = color
-
             submitAndNextTapBtn.backgroundColor = color
-            submitAndNextTapBtn.setTitleColor(.white, for: .normal)
 
             labelBGViews.forEach {
                 $0?.backgroundColor = ColorManager.randomColor()
@@ -382,4 +379,113 @@ class MatchImageWithLetterLevel2VC: BaseViewController {
         print("Connected:", userMatches.count)
         submitAndNextTapBtn.isHidden = userMatches.count < letterLabels.count
     }
+    
+    
+    func createPDF() -> URL? {
+
+        let pdfURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("MatchImageWithLetter.pdf")
+
+        view.layoutIfNeeded()
+
+        let views: [UIView] = [
+            labelBGView1, labelBGView2, labelBGView3, labelBGView4, labelBGView5,
+            imgBGView1, imgBGView2, imgBGView3, imgBGView4, imgBGView5
+        ]
+
+        guard let first = views.first else { return nil }
+
+        var captureRect = first.superview!.convert(first.frame, to: view)
+
+        for v in views.dropFirst() {
+            let rect = v.superview!.convert(v.frame, to: view)
+            captureRect = captureRect.union(rect)
+        }
+
+        // thoda padding
+        captureRect = captureRect.insetBy(dx: -10, dy: -10)
+
+        let renderer = UIGraphicsImageRenderer(size: captureRect.size)
+
+        let image = renderer.image { _ in
+            view.drawHierarchy(
+                in: CGRect(
+                    x: -captureRect.origin.x,
+                    y: -captureRect.origin.y,
+                    width: view.bounds.width,
+                    height: view.bounds.height
+                ),
+                afterScreenUpdates: true
+            )
+        }
+
+        let pageWidth: CGFloat = 595
+        let pageHeight: CGFloat = 842
+
+        let pdfRenderer = UIGraphicsPDFRenderer(
+            bounds: CGRect(x: 0, y: 0, width: pageWidth, height: pageHeight)
+        )
+
+        do {
+
+            try pdfRenderer.writePDF(to: pdfURL) { context in
+
+                context.beginPage()
+
+                let title = "Which Letter Goes With This Picture?"
+
+                title.draw(
+                    in: CGRect(x: 20, y: 20, width: pageWidth - 40, height: 30),
+                    withAttributes: [
+                        .font: UIFont.boldSystemFont(ofSize: 24),
+                        .foregroundColor: UIColor.black
+                    ]
+                )
+
+                let maxWidth = pageWidth - 40
+                let maxHeight = pageHeight - 90
+
+                let scale = min(
+                    maxWidth / image.size.width,
+                    maxHeight / image.size.height
+                )
+
+                let width = image.size.width * scale
+                let height = image.size.height * scale
+
+                image.draw(
+                    in: CGRect(
+                        x: (pageWidth - width) / 2,
+                        y: 70,
+                        width: width,
+                        height: height
+                    )
+                )
+            }
+
+            return pdfURL
+
+        } catch {
+
+            print(error)
+            return nil
+        }
+    }
+    
+    @IBAction func pdfTapBtn(_ sender: UIButton) {
+
+        guard let url = createPDF() else { return }
+
+        let vc = UIActivityViewController(
+            activityItems: [url],
+            applicationActivities: nil
+        )
+
+        if let pop = vc.popoverPresentationController {
+            pop.sourceView = sender
+        }
+
+        present(vc, animated: true)
+    }
+    
 }

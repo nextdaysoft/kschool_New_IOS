@@ -33,12 +33,6 @@ class PlanentOrderMatchResultLevel3VC: BaseViewController {
             gifImage.sd_setImage(with: url)
         }
         
-        nextBtn.layer.cornerRadius = 10
-        nextBtn.backgroundColor = ColorManager.randomColor()
-        nextBtn.layer.borderColor = UIColor.black.cgColor
-
-        
-        
     }
 
     func setup(){
@@ -49,6 +43,9 @@ class PlanentOrderMatchResultLevel3VC: BaseViewController {
         backBtn.tintColor = #colorLiteral(red: 0.1718951762, green: 0.212508589, blue: 0.3281655014, alpha: 1)
         HeaderView.backgroundColor = color
         statusView.backgroundColor = color
+        scoreBGVIew.layer.cornerRadius = 6
+        nextBtn.layer.cornerRadius = 6
+        nextBtn.backgroundColor = color
     }
 
     @IBAction func backTapBtn(_ sender: UIButton) {

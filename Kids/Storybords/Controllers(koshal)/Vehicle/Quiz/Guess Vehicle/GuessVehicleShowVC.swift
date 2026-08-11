@@ -68,9 +68,7 @@ class GuessVehicleShowVC: BaseViewController, AVSpeechSynthesizerDelegate {
         view2.layer.cornerRadius = 10
         view3.layer.cornerRadius = 10
         view4.layer.cornerRadius = 10
-        
-        scoreBGVIew.layer.cornerRadius = 10
-        
+       
         view1.addGestureRecognizer(tap1)
         view2.addGestureRecognizer(tap2)
         view3.addGestureRecognizer(tap3)
@@ -93,7 +91,9 @@ class GuessVehicleShowVC: BaseViewController, AVSpeechSynthesizerDelegate {
         let img = UIImage(systemName: "arrow.backward.circle", withConfiguration: config)
         backBtn.setImage(img, for: .normal)
         backBtn.tintColor = #colorLiteral(red: 0.1718951762, green: 0.212508589, blue: 0.3281655014, alpha: 1)
-        nextBtn.layer.cornerRadius = 10
+        nextBtn.layer.cornerRadius = 6
+        scoreBGVIew.layer.cornerRadius = 6
+        
     }
     
     func applyTheme() {
@@ -102,23 +102,14 @@ class GuessVehicleShowVC: BaseViewController, AVSpeechSynthesizerDelegate {
 
             HeaderView.backgroundColor = .white
             statusView.backgroundColor = .white
-
-            scoreBGVIew.backgroundColor = .white
-
             nextBtn.backgroundColor = .white
-            nextBtn.setTitleColor(.black, for: .normal)
-
         } else {
 
             let color = ColorManager.randomColor()
 
             HeaderView.backgroundColor = color
             statusView.backgroundColor = color
-
-            scoreBGVIew.backgroundColor = color
-
             nextBtn.backgroundColor = color
-            nextBtn.setTitleColor(.white, for: .normal)
         }
     }
     

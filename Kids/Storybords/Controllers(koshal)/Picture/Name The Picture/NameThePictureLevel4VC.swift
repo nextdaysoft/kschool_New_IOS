@@ -127,12 +127,8 @@ class NameThePictureLevel4VC: BaseViewController {
 
             HeaderView.backgroundColor = .white
             statusView.backgroundColor = .white
-
             resetBtn.backgroundColor = .white
-            resetBtn.setTitleColor(.black, for: .normal)
-
             undoAndNextBtn.backgroundColor = .white
-            undoAndNextBtn.setTitleColor(.black, for: .normal)
 
             sourceViews.forEach {
                 $0?.backgroundColor = .white
@@ -144,12 +140,8 @@ class NameThePictureLevel4VC: BaseViewController {
 
             HeaderView.backgroundColor = color
             statusView.backgroundColor = color
-
             resetBtn.backgroundColor = color
-            resetBtn.setTitleColor(.white, for: .normal)
-
             undoAndNextBtn.backgroundColor = color
-            undoAndNextBtn.setTitleColor(.white, for: .normal)
 
             sourceViews.forEach {
                 $0?.backgroundColor = ColorManager.randomColor()

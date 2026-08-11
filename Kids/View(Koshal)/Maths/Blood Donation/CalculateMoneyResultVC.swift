@@ -114,7 +114,6 @@ class CalculateMoneyResultVC: BaseViewController {
             scoreBGVIew.backgroundColor = .white
 
             nextBtn.backgroundColor = .white
-            nextBtn.setTitleColor(.black, for: .normal)
 
         } else {
 
@@ -126,7 +125,6 @@ class CalculateMoneyResultVC: BaseViewController {
             scoreBGVIew.backgroundColor = color
 
             nextBtn.backgroundColor = color
-            nextBtn.setTitleColor(.white, for: .normal)
         }
     }
     

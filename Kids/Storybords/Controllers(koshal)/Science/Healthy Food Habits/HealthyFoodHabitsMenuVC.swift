@@ -147,10 +147,12 @@ class HealthyFoodHabitsMenuVC: BaseViewController {
             }
 
         } else {
+            
+            let color = ColorManager.randomColor()
 
-            HeaderView.backgroundColor = ColorManager.randomColor()
-            statusView.backgroundColor = ColorManager.randomColor()
-
+            HeaderView.backgroundColor = color
+            statusView.backgroundColor = color
+            
             cardViews.forEach {
                 $0?.backgroundColor = ColorManager.randomColor()
             }

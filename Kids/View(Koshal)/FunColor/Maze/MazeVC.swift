@@ -42,6 +42,8 @@ class MazeVC: BaseViewController {
     var totalLevels = 10
     var menuLevel = 1
     
+    let goodJobBGView = UIView()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -89,7 +91,7 @@ class MazeVC: BaseViewController {
 
                 DispatchQueue.main.async {
 
-                    self.goodJobView.isHidden = false
+                    self.goodJobBGView.isHidden = false
                     self.nextButton.isHidden = false
                 }
             }
@@ -126,36 +128,33 @@ class MazeVC: BaseViewController {
     
     func setupWinViews() {
 
-        goodJobView.translatesAutoresizingMaskIntoConstraints = false
+        goodJobBGView.translatesAutoresizingMaskIntoConstraints = false
         goodJobLabel.translatesAutoresizingMaskIntoConstraints = false
         nextButton.translatesAutoresizingMaskIntoConstraints = false
 
-      
+        goodJobBGView.backgroundColor = currentThemeColor
+        goodJobBGView.layer.cornerRadius = 8
+
         goodJobLabel.text = "Good Job!".localiz()
         goodJobLabel.textColor = .white
         goodJobLabel.textAlignment = .center
         goodJobLabel.font = .systemFont(ofSize: 20, weight: .medium)
 
-        goodJobView.addSubview(goodJobLabel)
+        goodJobBGView.addSubview(goodJobLabel)
 
         NSLayoutConstraint.activate([
-            goodJobLabel.leadingAnchor.constraint(equalTo: goodJobView.leadingAnchor, constant: 8),
-            goodJobLabel.trailingAnchor.constraint(equalTo: goodJobView.trailingAnchor, constant: -8),
-            goodJobLabel.topAnchor.constraint(equalTo: goodJobView.topAnchor),
-            goodJobLabel.bottomAnchor.constraint(equalTo: goodJobView.bottomAnchor)
+            goodJobLabel.leadingAnchor.constraint(equalTo: goodJobBGView.leadingAnchor, constant: 8),
+            goodJobLabel.trailingAnchor.constraint(equalTo: goodJobBGView.trailingAnchor, constant: -8),
+            goodJobLabel.topAnchor.constraint(equalTo: goodJobBGView.topAnchor),
+            goodJobLabel.bottomAnchor.constraint(equalTo: goodJobBGView.bottomAnchor)
         ])
 
-        // Next Button
         nextButton.setTitle("Next".localiz(), for: .normal)
         nextButton.tintColor = .black
         nextButton.layer.cornerRadius = 6
+        nextButton.titleLabel?.font = .systemFont(ofSize: 15, weight: .regular)
 
-        nextButton.titleLabel?.font = .systemFont(
-            ofSize: 15,
-            weight: .regular
-        )
-
-        goodJobView.isHidden = true
+        goodJobBGView.isHidden = true
         nextButton.isHidden = true
 
         nextButton.addTarget(
@@ -164,28 +163,28 @@ class MazeVC: BaseViewController {
             for: .touchUpInside
         )
 
-        view.addSubview(goodJobView)
+        view.addSubview(goodJobBGView)
         view.addSubview(nextButton)
 
         NSLayoutConstraint.activate([
 
-            goodJobView.topAnchor.constraint(
+            goodJobBGView.topAnchor.constraint(
                 equalTo: mazeBGView.bottomAnchor,
                 constant: 15
             ),
-            goodJobView.leadingAnchor.constraint(
+            goodJobBGView.leadingAnchor.constraint(
                 equalTo: view.leadingAnchor,
                 constant: 10
             ),
-            goodJobView.widthAnchor.constraint(
-                equalToConstant: 120
+            goodJobBGView.widthAnchor.constraint(
+                equalToConstant: 110
             ),
-            goodJobView.heightAnchor.constraint(
-                equalToConstant: 45
+            goodJobBGView.heightAnchor.constraint(
+                equalToConstant: 50
             ),
 
             nextButton.centerYAnchor.constraint(
-                equalTo: goodJobView.centerYAnchor
+                equalTo: goodJobBGView.centerYAnchor
             ),
             nextButton.trailingAnchor.constraint(
                 equalTo: view.trailingAnchor,
@@ -208,7 +207,6 @@ class MazeVC: BaseViewController {
             statusView.backgroundColor = .white
 
             nextButton.backgroundColor = .white
-            nextButton.setTitleColor(.black, for: .normal)
 
             upButton.backgroundColor = .white
             leftButton.backgroundColor = .white
@@ -219,10 +217,10 @@ class MazeVC: BaseViewController {
 
             HeaderView.backgroundColor = currentThemeColor
             statusView.backgroundColor = currentThemeColor
-
             nextButton.backgroundColor = currentThemeColor
-            nextButton.setTitleColor(.white, for: .normal)
-
+            
+            goodJobBGView.backgroundColor = currentThemeColor
+            
             upButton.backgroundColor = currentThemeColor
             leftButton.backgroundColor = currentThemeColor
             downButton.backgroundColor = currentThemeColor
@@ -242,6 +240,12 @@ class MazeVC: BaseViewController {
         currentThemeColor = ColorManager.randomColor()
 
         applyTheme()
+        
+        applyTheme()
+
+        // Good Job background and Next button same color
+        goodJobBGView.backgroundColor = currentThemeColor
+        nextButton.backgroundColor = currentThemeColor
         
         let mazeData = MazeGenerator.generate(level: level)
 
@@ -444,7 +448,7 @@ class MazeVC: BaseViewController {
             return
         }
 
-        goodJobView.isHidden = true
+        goodJobBGView.isHidden = true
         nextButton.isHidden = true
 
         loadLevel(level: currentLevelNo)

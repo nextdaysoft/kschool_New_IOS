@@ -59,11 +59,7 @@ class HearAndFindResultVC: BaseViewController {
 
             HeaderView.backgroundColor = .white
             statusView.backgroundColor = .white
-
             nextBtn.backgroundColor = .white
-            nextBtn.setTitleColor(.black, for: .normal)
-
-            scoreBGVIew.backgroundColor = .white
 
         } else {
 
@@ -71,11 +67,7 @@ class HearAndFindResultVC: BaseViewController {
 
             HeaderView.backgroundColor = color
             statusView.backgroundColor = color
-
             nextBtn.backgroundColor = color
-            nextBtn.setTitleColor(.white, for: .normal)
-
-            scoreBGVIew.backgroundColor = color
         }
     }
 

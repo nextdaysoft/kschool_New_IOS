@@ -323,7 +323,7 @@ class WordSearchMenuVC: BaseViewController {
     
     @IBAction func level3TapBtn(_ sender: UIButton) {
 
-        //   guard checkSubscription() else { return }
+        guard checkSubscription() else { return }
 
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         if let vc = storyboard.instantiateViewController(
@@ -336,7 +336,7 @@ class WordSearchMenuVC: BaseViewController {
 
     @IBAction func level4TapBtn(_ sender: UIButton) {
 
-        //  guard checkSubscription() else { return }
+        guard checkSubscription() else { return }
 
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         if let vc = storyboard.instantiateViewController(
@@ -349,7 +349,7 @@ class WordSearchMenuVC: BaseViewController {
 
     @IBAction func level5TapBtn(_ sender: UIButton) {
 
-        //  guard checkSubscription() else { return }
+          guard checkSubscription() else { return }
 
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         if let vc = storyboard.instantiateViewController(
@@ -362,7 +362,7 @@ class WordSearchMenuVC: BaseViewController {
 
     @IBAction func level6TapBtn(_ sender: UIButton) {
 
-        //  guard checkSubscription() else { return }
+          guard checkSubscription() else { return }
 
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         if let vc = storyboard.instantiateViewController(
@@ -375,7 +375,7 @@ class WordSearchMenuVC: BaseViewController {
 
     @IBAction func level7TapBtn(_ sender: UIButton) {
 
-        //  guard checkSubscription() else { return }
+          guard checkSubscription() else { return }
 
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         if let vc = storyboard.instantiateViewController(
@@ -388,7 +388,7 @@ class WordSearchMenuVC: BaseViewController {
 
     @IBAction func level8TapBtn(_ sender: UIButton) {
 
-        //  guard checkSubscription() else { return }
+          guard checkSubscription() else { return }
 
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         if let vc = storyboard.instantiateViewController(
@@ -401,7 +401,7 @@ class WordSearchMenuVC: BaseViewController {
 
     @IBAction func level9TapBtn(_ sender: UIButton) {
 
-      //  guard checkSubscription() else { return }
+        guard checkSubscription() else { return }
 
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         if let vc = storyboard.instantiateViewController(

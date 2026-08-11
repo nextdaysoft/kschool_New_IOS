@@ -26,6 +26,8 @@ class LearnColorMixingShowVC: BaseViewController,AVSpeechSynthesizerDelegate {
     @IBOutlet weak var colorName2Label: UILabel!
     @IBOutlet weak var resultcolorNameLabel: UILabel!
     
+    @IBOutlet weak var pdfBtn: UIButton!
+    
     var colorMixItems: [ColorMixItem] = []
     
     var speechSynthesizer = AVSpeechSynthesizer()
@@ -729,6 +731,195 @@ class LearnColorMixingShowVC: BaseViewController,AVSpeechSynthesizerDelegate {
         imgBGView.layer.borderColor = randomColor.cgColor
     }
     
+    func createFruitsPDF() -> URL? {
+
+        let pdfURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("LearnColorMixing.pdf")
+
+        let pageWidth: CGFloat = 595
+        let pageHeight: CGFloat = 842
+
+        let renderer = UIGraphicsPDFRenderer(
+            bounds: CGRect(x: 0, y: 0, width: pageWidth, height: pageHeight)
+        )
+
+        do {
+
+            try renderer.writePDF(to: pdfURL) { context in
+
+                context.beginPage()
+
+                // Title
+                let title = "Learn Color Mixing"
+
+                let titleAttributes: [NSAttributedString.Key: Any] = [
+                    .font: UIFont.boldSystemFont(ofSize: 30),
+                    .foregroundColor: UIColor.black
+                ]
+
+                let titleSize = title.size(withAttributes: titleAttributes)
+
+                title.draw(
+                    at: CGPoint(
+                        x: (pageWidth - titleSize.width) / 2,
+                        y: 30
+                    ),
+                    withAttributes: titleAttributes
+                )
+
+                let cardWidth: CGFloat = 220
+                let cardHeight: CGFloat = 190
+
+                let startX: CGFloat = 50
+                let spacingX: CGFloat = 30
+
+                var xPos = startX
+                var yPos: CGFloat = 100
+
+                for (index, item) in colorMixItems.enumerated() {
+
+                    let cardRect = CGRect(
+                        x: xPos,
+                        y: yPos,
+                        width: cardWidth,
+                        height: cardHeight
+                    )
+
+                    // Card
+                    let bgPath = UIBezierPath(
+                        roundedRect: cardRect,
+                        cornerRadius: 12
+                    )
+
+                    UIColor.white.setFill()
+                    bgPath.fill()
+
+                    UIColor.lightGray.setStroke()
+                    bgPath.lineWidth = 1
+                    bgPath.stroke()
+
+                    // First Color
+                    let colorSize: CGFloat = 45
+
+                    let color1Rect = CGRect(
+                        x: cardRect.minX + 20,
+                        y: cardRect.minY + 20,
+                        width: colorSize,
+                        height: colorSize
+                    )
+
+                    item.color1.setFill()
+                    UIBezierPath(
+                        roundedRect: color1Rect,
+                        cornerRadius: 6
+                    ).fill()
+
+                    // +
+                    let plus = "+"
+                    let plusAttr: [NSAttributedString.Key: Any] = [
+                        .font: UIFont.boldSystemFont(ofSize: 22)
+                    ]
+
+                    plus.draw(
+                        at: CGPoint(
+                            x: color1Rect.maxX + 10,
+                            y: color1Rect.minY + 8
+                        ),
+                        withAttributes: plusAttr
+                    )
+
+                    // Second Color
+                    let color2Rect = CGRect(
+                        x: color1Rect.maxX + 35,
+                        y: cardRect.minY + 20,
+                        width: colorSize,
+                        height: colorSize
+                    )
+
+                    item.color2.setFill()
+                    UIBezierPath(
+                        roundedRect: color2Rect,
+                        cornerRadius: 6
+                    ).fill()
+
+                    // =
+                    let equal = "="
+
+                    equal.draw(
+                        at: CGPoint(
+                            x: color2Rect.maxX + 10,
+                            y: color2Rect.minY + 8
+                        ),
+                        withAttributes: plusAttr
+                    )
+
+                    // Result Color
+                    let resultRect = CGRect(
+                        x: color2Rect.maxX + 35,
+                        y: cardRect.minY + 20,
+                        width: colorSize,
+                        height: colorSize
+                    )
+
+                    item.resultColor.setFill()
+                    UIBezierPath(
+                        roundedRect: resultRect,
+                        cornerRadius: 6
+                    ).fill()
+
+                    // Description
+                    let description =
+                    "\(item.color1Name) + \(item.color2Name)\n=\n\(item.resultName)"
+
+                    let paragraph = NSMutableParagraphStyle()
+                    paragraph.alignment = .center
+
+                    let attrs: [NSAttributedString.Key: Any] = [
+                        .font: UIFont.boldSystemFont(ofSize: 15),
+                        .foregroundColor: UIColor.black,
+                        .paragraphStyle: paragraph
+                    ]
+
+                    (description as NSString).draw(
+                        in: CGRect(
+                            x: cardRect.minX + 10,
+                            y: cardRect.minY + 90,
+                            width: cardWidth - 20,
+                            height: 70
+                        ),
+                        withAttributes: attrs
+                    )
+
+                    // Next Position
+                    if index % 2 == 0 {
+
+                        xPos += cardWidth + spacingX
+
+                    } else {
+
+                        xPos = startX
+                        yPos += cardHeight + 20
+                    }
+
+                    // New Page
+                    if yPos > pageHeight - 220 {
+
+                        context.beginPage()
+
+                        yPos = 100
+                        xPos = startX
+                    }
+                }
+            }
+
+            return pdfURL
+
+        } catch {
+
+            print(error)
+            return nil
+        }
+    }
     
     @IBAction func repeatTapBtn(_ sender: UIButton) {
 
@@ -739,6 +930,22 @@ class LearnColorMixingShowVC: BaseViewController,AVSpeechSynthesizerDelegate {
     
     @IBAction func backTapBtn(_ sender: UIButton) {
         self.navigationController?.popViewController(animated: true)
+    }
+    
+    @IBAction func pdfTapBtn(_ sender: UIButton) {
+
+        guard let pdfURL = createFruitsPDF() else { return }
+
+        let activityVC = UIActivityViewController(
+            activityItems: [pdfURL],
+            applicationActivities: nil
+        )
+
+        if let popover = activityVC.popoverPresentationController {
+            popover.sourceView = sender
+        }
+
+        present(activityVC, animated: true)
     }
     
  

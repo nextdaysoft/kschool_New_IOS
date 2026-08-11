@@ -34,6 +34,8 @@ class AscendingAndDescendingShowVC: BaseViewController {
     @IBOutlet weak var scoreLbl: UILabel!
     @IBOutlet weak var scoreBGView: UIView!
     
+    @IBOutlet weak var pdfBtn: UIButton!
+    
     var correctOrder: [Int] = []
     var numbers: [Int] = []
     
@@ -64,7 +66,7 @@ class AscendingAndDescendingShowVC: BaseViewController {
         lockViewSize()
         loadNewQuestion()
         
-        scoreBGView.layer.cornerRadius = 10
+        scoreBGView.layer.cornerRadius = 6
         
         view1.layer.cornerRadius = 10
         view2.layer.cornerRadius = 10
@@ -218,11 +220,12 @@ class AscendingAndDescendingShowVC: BaseViewController {
 
             HeaderView.backgroundColor = .white
             statusView.backgroundColor = .white
-
-            scoreBGView.backgroundColor = .white
-
             submitBtn.backgroundColor = .white
-            submitBtn.setTitleColor(.black, for: .normal)
+
+            view1.backgroundColor = .white
+            view2.backgroundColor = .white
+            view3.backgroundColor = .white
+            view4.backgroundColor = .white
 
         } else {
 
@@ -230,11 +233,12 @@ class AscendingAndDescendingShowVC: BaseViewController {
 
             HeaderView.backgroundColor = color
             statusView.backgroundColor = color
-
-            scoreBGView.backgroundColor = color
-
             submitBtn.backgroundColor = color
-            submitBtn.setTitleColor(.white, for: .normal)
+
+            view1.backgroundColor = ColorManager.randomColor()
+            view2.backgroundColor = ColorManager.randomColor()
+            view3.backgroundColor = ColorManager.randomColor()
+            view4.backgroundColor = ColorManager.randomColor()
         }
     }
     
@@ -280,7 +284,153 @@ class AscendingAndDescendingShowVC: BaseViewController {
         vc.isAscending = isAscending
         vc.levelNumber = self.levelNumber 
 
+        vc.viewColors = [
+            view1.backgroundColor ?? .white,
+            view2.backgroundColor ?? .white,
+            view3.backgroundColor ?? .white,
+            view4.backgroundColor ?? .white
+        ]
+        
         navigationController?.pushViewController(vc, animated: false)
+    }
+    
+    func createPDF() -> URL? {
+
+        let pdfName = isAscending ? "Ascending Order" : "Descending Order"
+
+        let pdfURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("\(pdfName).pdf")
+
+        view.layoutIfNeeded()
+
+        let views: [UIView] = [
+            view1,
+            view2,
+            view3,
+            view4
+        ]
+
+        guard let first = views.first else { return nil }
+
+        var captureRect = first.superview!.convert(first.frame, to: view)
+
+        for v in views.dropFirst() {
+            let rect = v.superview!.convert(v.frame, to: view)
+            captureRect = captureRect.union(rect)
+        }
+
+        captureRect = captureRect.insetBy(dx: -15, dy: -15)
+
+        let renderer = UIGraphicsImageRenderer(size: captureRect.size)
+
+        let image = renderer.image { _ in
+
+            let hiddenViews: [UIView] = [
+                HeaderView,
+                statusView,
+                backBtn,
+                pdfBtn,
+                submitBtn,
+                titelLbl,
+                texLbl,
+                questionLbl,
+                scoreLbl,
+                scoreBGView
+            ]
+
+            hiddenViews.forEach { $0.isHidden = true }
+
+            self.view.layoutIfNeeded()
+
+            self.view.drawHierarchy(
+                in: CGRect(
+                    x: -captureRect.origin.x,
+                    y: -captureRect.origin.y,
+                    width: self.view.bounds.width,
+                    height: self.view.bounds.height
+                ),
+                afterScreenUpdates: true
+            )
+
+            hiddenViews.forEach { $0.isHidden = false }
+
+            self.view.layoutIfNeeded()
+        }
+
+        let pageWidth: CGFloat = 595
+        let pageHeight: CGFloat = 842
+
+        let pdfRenderer = UIGraphicsPDFRenderer(
+            bounds: CGRect(x: 0, y: 0, width: pageWidth, height: pageHeight)
+        )
+
+        do {
+
+            try pdfRenderer.writePDF(to: pdfURL) { context in
+
+                context.beginPage()
+
+                let title = isAscending
+                    ? "Rearrange the numbers in ascending order."
+                    : "Rearrange the numbers in descending order."
+
+                title.draw(
+                    in: CGRect(
+                        x: 20,
+                        y: 20,
+                        width: pageWidth - 40,
+                        height: 40
+                    ),
+                    withAttributes: [
+                        .font: UIFont.boldSystemFont(ofSize: 24),
+                        .foregroundColor: UIColor.black
+                    ]
+                )
+
+                let maxWidth = pageWidth - 40
+                let maxHeight = pageHeight - 90
+
+                let scale = min(
+                    maxWidth / image.size.width,
+                    maxHeight / image.size.height
+                )
+
+                let drawWidth = image.size.width * scale
+                let drawHeight = image.size.height * scale
+
+                image.draw(
+                    in: CGRect(
+                        x: (pageWidth - drawWidth) / 2,
+                        y: 80,
+                        width: drawWidth,
+                        height: drawHeight
+                    )
+                )
+            }
+
+            return pdfURL
+
+        } catch {
+
+            print(error)
+            return nil
+        }
+    }
+    
+    @IBAction func pdfTapBtn(_ sender: UIButton) {
+
+        guard let url = createPDF() else { return }
+
+        let activityVC = UIActivityViewController(
+            activityItems: [url],
+            applicationActivities: nil
+        )
+
+        if let pop = activityVC.popoverPresentationController {
+            pop.sourceView = sender
+        }
+
+        present(activityVC, animated: true)
     }
     
 }

@@ -119,7 +119,6 @@ class Coloring: BaseViewController {
             statusView.backgroundColor = .white
 
             nextBtn.backgroundColor = .white
-            nextBtn.setTitleColor(.black, for: .normal)
 
             jobLblView.backgroundColor = .white
             jobLbl.textColor = .black
@@ -132,7 +131,6 @@ class Coloring: BaseViewController {
             statusView.backgroundColor = color
 
             nextBtn.backgroundColor = color
-            nextBtn.setTitleColor(.white, for: .normal)
 
             jobLblView.backgroundColor = ColorManager.randomColor()
             jobLbl.textColor = .white

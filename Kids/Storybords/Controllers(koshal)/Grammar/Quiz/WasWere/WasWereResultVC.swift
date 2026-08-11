@@ -70,14 +70,6 @@ class WasWereResultVC: BaseViewController {
 
             bgViews[i]?.layer.cornerRadius = 15
             bgViews[i]?.layer.borderWidth = 3
-
-            
-            if UserDefaults.standard.bool(forKey: "WhiteTheme") {
-                bgViews[i]?.backgroundColor = .white
-            } else {
-                bgViews[i]?.backgroundColor = ColorManager.randomColor()
-            }
-            
             
             if result.isCorrect {
                 // Correct answer
@@ -112,8 +104,7 @@ class WasWereResultVC: BaseViewController {
             statusView.backgroundColor = .white
 
             nextBtn.backgroundColor = .white
-            nextBtn.setTitleColor(.black, for: .normal)
-
+            
             scoreBGVIew.backgroundColor = .white
 
         } else {
@@ -124,8 +115,7 @@ class WasWereResultVC: BaseViewController {
             statusView.backgroundColor = color
 
             nextBtn.backgroundColor = color
-            nextBtn.setTitleColor(.white, for: .normal)
-
+            
             scoreBGVIew.backgroundColor = color
         }
     }

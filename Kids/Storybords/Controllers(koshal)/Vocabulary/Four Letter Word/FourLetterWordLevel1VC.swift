@@ -38,6 +38,8 @@ class FourLetterWordLevel1VC: BaseViewController {
     @IBOutlet weak var HeaderView: UIView!
     @IBOutlet weak var statusView: UIView!
     
+    @IBOutlet weak var pdfBtn: UIButton!
+    
     var lineLayer = CAShapeLayer()
     var linePath = UIBezierPath()
 
@@ -229,13 +231,7 @@ class FourLetterWordLevel1VC: BaseViewController {
             statusView.backgroundColor = .white
 
             giveUpAndNextBtn.backgroundColor = .white
-            giveUpAndNextBtn.setTitleColor(.black, for: .normal)
-
             hintBtn.backgroundColor = .white
-            hintBtn.setTitleColor(.black, for: .normal)
-
-            scoreLabelBGView.backgroundColor = .white
-            mainBGView.backgroundColor = .white
 
             view1.backgroundColor = .white
             view2.backgroundColor = .white
@@ -250,13 +246,7 @@ class FourLetterWordLevel1VC: BaseViewController {
             statusView.backgroundColor = color
 
             giveUpAndNextBtn.backgroundColor = color
-            giveUpAndNextBtn.setTitleColor(.white, for: .normal)
-
             hintBtn.backgroundColor = color
-            hintBtn.setTitleColor(.white, for: .normal)
-
-            scoreLabelBGView.backgroundColor = color
-            mainBGView.backgroundColor = .white
 
             view1.backgroundColor = ColorManager.randomColor()
             view2.backgroundColor = ColorManager.randomColor()
@@ -780,4 +770,95 @@ class FourLetterWordLevel1VC: BaseViewController {
     @IBAction func backBtnAction(_ sender: Any) {
         self.navigationController?.popViewController(animated: true)
     }
+    
+    func createPDF() -> URL? {
+
+        let pdfURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("Three Letter Word.pdf")
+
+        view.layoutIfNeeded()
+
+        // Sirf mainBGView ka screenshot
+        let renderer = UIGraphicsImageRenderer(size: mainBGView.bounds.size)
+
+        let image = renderer.image { _ in
+            mainBGView.drawHierarchy(in: mainBGView.bounds, afterScreenUpdates: true)
+        }
+
+        let pageRect = CGRect(x: 0, y: 0, width: 595, height: 842)
+
+        let pdfRenderer = UIGraphicsPDFRenderer(bounds: pageRect)
+
+        do {
+
+            try pdfRenderer.writePDF(to: pdfURL) { context in
+
+                context.beginPage()
+
+                // Title
+                let title = "Join the Letter Blocks to Create a Fun Word!"
+
+                let titleStyle = NSMutableParagraphStyle()
+                titleStyle.alignment = .center
+
+                let titleAttr: [NSAttributedString.Key: Any] = [
+                    .font: UIFont.boldSystemFont(ofSize: 24),
+                    .paragraphStyle: titleStyle
+                ]
+
+                let titleRect = CGRect(
+                    x: 20,
+                    y: 20,
+                    width: pageRect.width - 40,
+                    height: 70
+                )
+
+                title.draw(in: titleRect, withAttributes: titleAttr)
+
+                // Screenshot
+                let top: CGFloat = 110
+
+                let scale = min(
+                    (pageRect.width - 40) / image.size.width,
+                    (pageRect.height - top - 20) / image.size.height
+                )
+
+                let width = image.size.width * scale
+                let height = image.size.height * scale
+
+                image.draw(
+                    in: CGRect(
+                        x: (pageRect.width - width) / 2,
+                        y: top,
+                        width: width,
+                        height: height
+                    )
+                )
+            }
+
+            return pdfURL
+
+        } catch {
+
+            print(error)
+            return nil
+        }
+    }
+    
+    @IBAction func pdfTapBtn(_ sender: UIButton) {
+
+        guard let pdfURL = createPDF() else { return }
+
+        let activityVC = UIActivityViewController(
+            activityItems: [pdfURL],
+            applicationActivities: nil
+        )
+
+        if let popover = activityVC.popoverPresentationController {
+            popover.sourceView = sender
+        }
+
+        present(activityVC, animated: true)
+    }
+    
 }

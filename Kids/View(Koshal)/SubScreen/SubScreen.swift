@@ -328,13 +328,13 @@ extension SubScreen: UITableViewDataSource, UITableViewDelegate{
             // ---------- VOCABULARY ----------
             if self.category == .vocabulary {
 
-//                // case 0,1,2 free
-//                if indexPath.row > 2 {
-//
-//                    guard self.checkSubscription() else {
-//                        return
-//                    }
-//                }
+                // case 0,1,2 free
+                if indexPath.row > 2 {
+
+                    guard self.checkSubscription() else {
+                        return
+                    }
+                }
 
                 switch indexPath.row {
 

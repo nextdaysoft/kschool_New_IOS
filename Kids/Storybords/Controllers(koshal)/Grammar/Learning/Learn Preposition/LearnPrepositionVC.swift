@@ -251,28 +251,13 @@ class LearnPrepositionVC: BaseViewController {
 
             HeaderView.backgroundColor = .white
             statusView.backgroundColor = .white
-
-            for view in bgViews {
-                view.backgroundColor = .white
-            }
-
-            pdfBtn.backgroundColor = .white
-            pdfBtn.setTitleColor(.black, for: .normal)
-
+            
         } else {
 
             let color = ColorManager.randomColor()
 
             HeaderView.backgroundColor = color
             statusView.backgroundColor = color
-
-            for view in bgViews {
-                view.backgroundColor = ColorManager.randomColor()
-            }
-
-            let buttonColor = ColorManager.randomColor()
-            pdfBtn.backgroundColor = buttonColor
-            pdfBtn.setTitleColor(.white, for: .normal)
         }
     }
     

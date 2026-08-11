@@ -114,10 +114,7 @@ class AscendingAndDescendingScoreResultVC: BaseViewController {
             HeaderView.backgroundColor = .white
             statusView.backgroundColor = .white
 
-            scoreBGVIew.backgroundColor = .white
-
             nextBtn.backgroundColor = .white
-            nextBtn.setTitleColor(.black, for: .normal)
 
         } else {
 
@@ -126,10 +123,7 @@ class AscendingAndDescendingScoreResultVC: BaseViewController {
             HeaderView.backgroundColor = color
             statusView.backgroundColor = color
 
-            scoreBGVIew.backgroundColor = color
-
             nextBtn.backgroundColor = color
-            nextBtn.setTitleColor(.white, for: .normal)
         }
     }
     

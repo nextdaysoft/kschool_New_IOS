@@ -142,10 +142,8 @@ class OrderSentenceLevel1VC: BaseViewController {
             statusView.backgroundColor = .white
 
             nextBtn.backgroundColor = .white
-            nextBtn.setTitleColor(.black, for: .normal)
 
             repeatBtn.backgroundColor = .white
-            repeatBtn.setTitleColor(.black, for: .normal)
 
             scoreLabelBGView.backgroundColor = .white
 
@@ -157,10 +155,8 @@ class OrderSentenceLevel1VC: BaseViewController {
             statusView.backgroundColor = color
 
             nextBtn.backgroundColor = color
-            nextBtn.setTitleColor(.white, for: .normal)
 
             repeatBtn.backgroundColor = color
-            repeatBtn.setTitleColor(.white, for: .normal)
 
             scoreLabelBGView.backgroundColor = color
         }

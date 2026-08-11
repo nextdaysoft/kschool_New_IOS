@@ -60,12 +60,6 @@ class TreeResultVC: BaseViewController {
             bgViews[i]?.layer.borderWidth = 3
             labels[i]?.numberOfLines = 0
 
-            if UserDefaults.standard.bool(forKey: "WhiteTheme") {
-                bgViews[i]?.backgroundColor = .white
-            } else {
-                bgViews[i]?.backgroundColor = ColorManager.randomColor()
-            }
-            
             if result.isCorrect {
 
                 // Correct case
@@ -102,9 +96,6 @@ class TreeResultVC: BaseViewController {
             statusView.backgroundColor = .white
 
             nextBtn.backgroundColor = .white
-            nextBtn.setTitleColor(.black, for: .normal)
-
-            scoreBGVIew.backgroundColor = .white
 
         } else {
 
@@ -114,9 +105,7 @@ class TreeResultVC: BaseViewController {
             statusView.backgroundColor = color
 
             nextBtn.backgroundColor = color
-            nextBtn.setTitleColor(.white, for: .normal)
 
-            scoreBGVIew.backgroundColor = color
         }
     }
 

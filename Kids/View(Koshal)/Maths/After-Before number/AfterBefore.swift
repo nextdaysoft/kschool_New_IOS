@@ -30,6 +30,10 @@ class AfterBefore: BaseViewController {
     @IBOutlet weak var resultImage: UIImageView!
     @IBOutlet weak var HeaderView: UIView!
     @IBOutlet weak var statusView: UIView!
+    
+    @IBOutlet weak var pdfBtn: UIButton!
+    
+    
     // MARK: Variable
     var isBeforeNumber = false   // true → after, false → before
     var screenTitle = ""
@@ -350,6 +354,95 @@ class AfterBefore: BaseViewController {
         }
 
     }
+    
+    func createPDF() -> URL? {
+
+        let pdfURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("\(isBeforeNumber ? "BeforeNumber" : "AfterNumber").pdf")
+
+        let pageWidth: CGFloat = 595
+        let pageHeight: CGFloat = 842
+
+        let renderer = UIGraphicsPDFRenderer(
+            bounds: CGRect(x: 0, y: 0, width: pageWidth, height: pageHeight)
+        )
+
+        do {
+
+            try renderer.writePDF(to: pdfURL) { context in
+
+                context.beginPage()
+
+                let title = isBeforeNumber ? "Before Number" : "After Number"
+
+                title.draw(
+                    in: CGRect(
+                        x: 20,
+                        y: 20,
+                        width: pageWidth - 40,
+                        height: 35
+                    ),
+                    withAttributes: [
+                        .font: UIFont.boldSystemFont(ofSize: 24),
+                        .foregroundColor: UIColor.black
+                    ]
+                )
+
+                var y: CGFloat = 90
+
+                for _ in 0..<10 {
+
+                    let number = Int.random(in: 1...100)
+
+                    let text: String
+
+                    if isBeforeNumber {
+                        text = "_____   ←   \(number)"
+                    } else {
+                        text = "\(number)   →   _____"
+                    }
+
+                    (text as NSString).draw(
+                        at: CGPoint(x: 110, y: y),
+                        withAttributes: [
+                            .font: UIFont.systemFont(ofSize: 28)
+                        ]
+                    )
+
+                    y += 60
+
+                    if y > 760 {
+                        context.beginPage()
+                        y = 60
+                    }
+                }
+            }
+
+            return pdfURL
+
+        } catch {
+
+            print(error)
+            return nil
+        }
+    }
+    
+    @IBAction func pdfTapBtn(_ sender: UIButton) {
+
+        guard let pdfURL = createPDF() else { return }
+
+        let activityVC = UIActivityViewController(
+            activityItems: [pdfURL],
+            applicationActivities: nil
+        )
+
+        if let popover = activityVC.popoverPresentationController {
+            popover.sourceView = sender
+        }
+
+        present(activityVC, animated: true)
+    }
+    
 
 }
 // MARK: Extension

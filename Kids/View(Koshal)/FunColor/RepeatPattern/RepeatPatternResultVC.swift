@@ -70,7 +70,6 @@ class RepeatPatternResultVC: BaseViewController {
             scoreLabelBGView.backgroundColor = .white
 
             nextBtn.backgroundColor = .white
-            nextBtn.setTitleColor(.black, for: .normal)
 
         } else {
 
@@ -82,7 +81,6 @@ class RepeatPatternResultVC: BaseViewController {
             scoreLabelBGView.backgroundColor = color
 
             nextBtn.backgroundColor = color
-            nextBtn.setTitleColor(.white, for: .normal)
         }
     }
     

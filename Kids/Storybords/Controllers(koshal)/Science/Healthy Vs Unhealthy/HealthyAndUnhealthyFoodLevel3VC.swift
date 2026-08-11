@@ -111,12 +111,7 @@ class HealthyAndUnhealthyFoodLevel3VC: BaseViewController {
 
             HeaderView.backgroundColor = .white
             statusView.backgroundColor = .white
-
             nextBtn.backgroundColor = .white
-            nextBtn.setTitleColor(.black, for: .normal)
-
-            healthyBGView.backgroundColor = .white
-            unhealthyBGView.backgroundColor = .white
 
         } else {
 
@@ -126,10 +121,6 @@ class HealthyAndUnhealthyFoodLevel3VC: BaseViewController {
             statusView.backgroundColor = color
 
             nextBtn.backgroundColor = color
-            nextBtn.setTitleColor(.white, for: .normal)
-
-            healthyBGView.backgroundColor = ColorManager.randomColor()
-            unhealthyBGView.backgroundColor = ColorManager.randomColor()
         }
     }
     

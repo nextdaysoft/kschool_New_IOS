@@ -51,6 +51,8 @@ class AdditionLevel2VC: BaseViewController {
     @IBOutlet weak var lineView: UIView!
     @IBOutlet weak var lineViewWidthConstraint: NSLayoutConstraint!
     
+    @IBOutlet weak var pdfBtn: UIButton!
+    
     private var keys: [KeypadItem] = []
     private var correctAnswer: Int = 0
     private var score: Int = 0
@@ -223,11 +225,7 @@ class AdditionLevel2VC: BaseViewController {
 
             HeaderView.backgroundColor = .white
             statusView.backgroundColor = .white
-
-            scoreView.backgroundColor = .white
-
             btnNext.backgroundColor = .white
-            btnNext.setTitleColor(.black, for: .normal)
 
         } else {
 
@@ -235,11 +233,7 @@ class AdditionLevel2VC: BaseViewController {
 
             HeaderView.backgroundColor = color
             statusView.backgroundColor = color
-
-            scoreView.backgroundColor = color
-
             btnNext.backgroundColor = color
-            btnNext.setTitleColor(.white, for: .normal)
         }
 
         // ✅ इनका color हमेशा Random ही रहेगा
@@ -677,6 +671,194 @@ class AdditionLevel2VC: BaseViewController {
             generateQuestion()
         }
     }
+    
+    func createPDF() -> URL? {
+
+        let pdfURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("Addition.pdf")
+
+        view.layoutIfNeeded()
+
+        // Save original hidden state
+        let hiddenViews: [(UIView, Bool)] = [
+            (HeaderView, HeaderView.isHidden),
+            (statusView, statusView.isHidden),
+            (backBtn, backBtn.isHidden),
+            (lblTitle, lblTitle.isHidden),
+            (lblQuestionNumber, lblQuestionNumber.isHidden),
+            (lblQuestion, lblQuestion.isHidden),
+            (scoreView, scoreView.isHidden),
+            (scoreMainView, scoreMainView.isHidden),
+            (btnNext, btnNext.isHidden),
+            (keyPad, keyPad.isHidden),
+            (pdfBtn, pdfBtn.isHidden)
+        ]
+
+        hiddenViews.forEach { view, _ in
+            view.isHidden = true
+        }
+
+        view.layoutIfNeeded()
+
+        let captureViews: [UIView] = [
+            iconPlus,
+            firstdigit,
+            seconddigit,
+            thirddigit,
+            fourthdigit,
+            carryView2,
+            carryView3,
+            carryView4,
+            ansdigit4,
+            ansdigit,
+            ansonedigit,
+            lineView
+        ]
+
+        guard let first = captureViews.first else {
+
+            hiddenViews.forEach { view, wasHidden in
+                view.isHidden = wasHidden
+            }
+
+            return nil
+        }
+
+        var captureRect = first.superview!.convert(first.frame, to: view)
+
+        for v in captureViews.dropFirst() {
+
+            let rect = v.superview!.convert(v.frame, to: view)
+            captureRect = captureRect.union(rect)
+        }
+
+        captureRect = captureRect.insetBy(dx: -30, dy: -30)
+
+        let renderer = UIGraphicsImageRenderer(size: captureRect.size)
+
+        let image = renderer.image { _ in
+
+            self.view.drawHierarchy(
+                in: CGRect(
+                    x: -captureRect.origin.x,
+                    y: -captureRect.origin.y,
+                    width: self.view.bounds.width,
+                    height: self.view.bounds.height
+                ),
+                afterScreenUpdates: true
+            )
+        }
+
+        hiddenViews.forEach { view, wasHidden in
+            view.isHidden = wasHidden
+        }
+
+        view.layoutIfNeeded()
+
+        let pageWidth: CGFloat = 595
+        let pageHeight: CGFloat = 842
+
+        let pdfRenderer = UIGraphicsPDFRenderer(
+            bounds: CGRect(
+                x: 0,
+                y: 0,
+                width: pageWidth,
+                height: pageHeight
+            )
+        )
+
+        do {
+
+            try pdfRenderer.writePDF(to: pdfURL) { context in
+
+                context.beginPage()
+
+                let paragraph = NSMutableParagraphStyle()
+                paragraph.alignment = .center
+
+                let attributes: [NSAttributedString.Key: Any] = [
+                    .font: UIFont.boldSystemFont(ofSize: 24),
+                    .foregroundColor: UIColor.black,
+                    .paragraphStyle: paragraph
+                ]
+
+                ("Addition" as NSString).draw(
+                    with: CGRect(
+                        x: 20,
+                        y: 20,
+                        width: pageWidth - 40,
+                        height: 40
+                    ),
+                    options: .usesLineFragmentOrigin,
+                    attributes: attributes,
+                    context: nil
+                )
+
+                let maxWidth = pageWidth - 40
+                let maxHeight = pageHeight - 100
+
+                let scale = min(
+                    maxWidth / image.size.width,
+                    maxHeight / image.size.height
+                )
+
+                let drawWidth = image.size.width * scale
+                let drawHeight = image.size.height * scale
+
+                image.draw(
+                    in: CGRect(
+                        x: (pageWidth - drawWidth) / 2,
+                        y: 90,
+                        width: drawWidth,
+                        height: drawHeight
+                    )
+                )
+            }
+
+            return pdfURL
+
+        } catch {
+
+            hiddenViews.forEach { view, wasHidden in
+                view.isHidden = wasHidden
+            }
+
+            view.layoutIfNeeded()
+
+            print(error)
+            return nil
+        }
+    }
+    
+    @IBAction func pdfTapBtn(_ sender: UIButton) {
+
+        let wasNextHidden = btnNext.isHidden
+
+        btnNext.isHidden = true
+        view.layoutIfNeeded()
+
+        guard let url = createPDF() else {
+
+            btnNext.isHidden = wasNextHidden
+            view.layoutIfNeeded()
+            return
+        }
+
+        btnNext.isHidden = wasNextHidden
+        view.layoutIfNeeded()
+
+        let activityVC = UIActivityViewController(
+            activityItems: [url],
+            applicationActivities: nil
+        )
+
+        if let pop = activityVC.popoverPresentationController {
+            pop.sourceView = sender
+        }
+
+        present(activityVC, animated: true)
+    }
+    
 }
 extension AdditionLevel2VC: UICollectionViewDataSource, UICollectionViewDelegate {
 

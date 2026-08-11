@@ -68,6 +68,9 @@ class WordMath: BaseViewController {
     @IBOutlet weak var thcenterPlus: UILabel!
     @IBOutlet weak var thequal: UILabel!
     @IBOutlet weak var mainThirdView: UIView!
+    
+    @IBOutlet weak var pdfBtn: UIButton!
+    
     // MARK: Variable
     private var keys: [KeypadItem] = []
     private var correctAnswer: Int = 0
@@ -687,11 +690,7 @@ class WordMath: BaseViewController {
 
             HeaderView.backgroundColor = .white
             statusView.backgroundColor = .white
-
-            scoreView.backgroundColor = .white
-
             btnNext.backgroundColor = .white
-            btnNext.setTitleColor(.black, for: .normal)
 
         } else {
 
@@ -699,11 +698,7 @@ class WordMath: BaseViewController {
 
             HeaderView.backgroundColor = color
             statusView.backgroundColor = color
-
-            scoreView.backgroundColor = color
-
             btnNext.backgroundColor = color
-            btnNext.setTitleColor(.white, for: .normal)
         }
 
         // ✅ इनको WhiteTheme से कभी change नहीं करना
@@ -817,6 +812,146 @@ class WordMath: BaseViewController {
         sender.setTitle("Submit", for: .normal)
         generateQuestion()
     }
+    
+    func createPDF() -> URL? {
+
+        let pdfURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("WordMath.pdf")
+
+        view.layoutIfNeeded()
+
+        // Hide unwanted views
+        let hiddenViews: [UIView] = [
+            HeaderView,
+            statusView,
+            backBtn,
+            lblTitle,
+            lblQuestionNumber,
+            lblQuestion,
+            scoreView,
+            scoreMainView,
+            btnNext,
+            keyPad,
+            pdfBtn
+        ]
+
+        hiddenViews.forEach { $0.isHidden = true }
+
+        view.layoutIfNeeded()
+
+        let renderer = UIGraphicsImageRenderer(size: view.bounds.size)
+
+        let image = renderer.image { _ in
+            view.drawHierarchy(
+                in: view.bounds,
+                afterScreenUpdates: true
+            )
+        }
+
+        // Show hidden views again
+        hiddenViews.forEach { $0.isHidden = false }
+
+        view.layoutIfNeeded()
+
+        let pageWidth: CGFloat = 595
+        let pageHeight: CGFloat = 842
+
+        let pdfRenderer = UIGraphicsPDFRenderer(
+            bounds: CGRect(
+                x: 0,
+                y: 0,
+                width: pageWidth,
+                height: pageHeight
+            )
+        )
+
+        do {
+
+            try pdfRenderer.writePDF(to: pdfURL) { context in
+
+                context.beginPage()
+
+                // ==========================
+                // Title
+                // ==========================
+
+                let title = "Fill in the boxes. The value of each fruit is given at the bottom."
+
+                let paragraph = NSMutableParagraphStyle()
+                paragraph.alignment = .center
+
+                let attributes: [NSAttributedString.Key: Any] = [
+                    .font: UIFont.boldSystemFont(ofSize: 22),
+                    .foregroundColor: UIColor.black,
+                    .paragraphStyle: paragraph
+                ]
+
+                (title as NSString).draw(
+                    with: CGRect(
+                        x: 20,
+                        y: 20,
+                        width: pageWidth - 40,
+                        height: 70
+                    ),
+                    options: [
+                        .usesLineFragmentOrigin,
+                        .usesFontLeading
+                    ],
+                    attributes: attributes,
+                    context: nil
+                )
+
+                // ==========================
+                // Image
+                // ==========================
+
+                let maxWidth = pageWidth - 40
+                let maxHeight = pageHeight - 120
+
+                let scale = min(
+                    maxWidth / image.size.width,
+                    maxHeight / image.size.height
+                )
+
+                let drawWidth = image.size.width * scale
+                let drawHeight = image.size.height * scale
+
+                image.draw(
+                    in: CGRect(
+                        x: (pageWidth - drawWidth) / 2,
+                        y: 100,
+                        width: drawWidth,
+                        height: drawHeight
+                    )
+                )
+            }
+
+            return pdfURL
+
+        } catch {
+
+            print(error)
+            return nil
+        }
+    }
+    
+    
+    @IBAction func pdfTapBtn(_ sender: UIButton) {
+
+        guard let url = createPDF() else { return }
+
+        let activityVC = UIActivityViewController(
+            activityItems: [url],
+            applicationActivities: nil
+        )
+
+        if let pop = activityVC.popoverPresentationController {
+            pop.sourceView = sender
+        }
+
+        present(activityVC, animated: true)
+    }
+    
 }
 extension WordMath: UICollectionViewDataSource, UICollectionViewDelegate {
 

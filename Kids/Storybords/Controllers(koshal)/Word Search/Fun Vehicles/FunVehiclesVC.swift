@@ -252,6 +252,7 @@ class FunVehiclesVC: BaseViewController {
     @IBOutlet weak var HeaderView: UIView!
     @IBOutlet weak var statusView: UIView!
     
+    @IBOutlet weak var pdfBtn: UIButton!
     
     // MARK: - DATA
     let vehiclesList = [
@@ -611,5 +612,8 @@ class FunVehiclesVC: BaseViewController {
                 }
             }
         }
+    }
+   
+    @IBAction func pdfTapBtn(_ sender: UIButton) {
     }
 }

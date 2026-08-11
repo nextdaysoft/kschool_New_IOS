@@ -226,7 +226,8 @@ class FunDaysOfTheWeekVC: BaseViewController {
     @IBOutlet weak var HeaderView: UIView!
     @IBOutlet weak var statusView: UIView!
     
-    
+    @IBOutlet weak var pdfBtn: UIButton!
+  
     // MARK: - DATA (DAYS)
     let days = [
         "MONDAY".localiz(),
@@ -325,9 +326,7 @@ class FunDaysOfTheWeekVC: BaseViewController {
 
             HeaderView.backgroundColor = .white
             statusView.backgroundColor = .white
-
             hintAndNextBtnBGView.backgroundColor = .white
-            hintAndNextBtn.setTitleColor(.black, for: .normal)
 
         } else {
 
@@ -335,9 +334,7 @@ class FunDaysOfTheWeekVC: BaseViewController {
 
             HeaderView.backgroundColor = color
             statusView.backgroundColor = color
-
             hintAndNextBtnBGView.backgroundColor = color
-            hintAndNextBtn.setTitleColor(.white, for: .normal)
         }
     }
     
@@ -516,6 +513,61 @@ class FunDaysOfTheWeekVC: BaseViewController {
         }
     }
     
+    func createPDF() -> URL? {
+
+        let headerHidden = HeaderView.isHidden
+        let statusHidden = statusView.isHidden
+        let scoreHidden = scoreLabelBGView.isHidden
+        let hintHidden = hintAndNextBtnBGView.isHidden
+        let pdfHidden = pdfBtn.isHidden
+
+        HeaderView.isHidden = true
+        statusView.isHidden = true
+        scoreLabelBGView.isHidden = true
+        hintAndNextBtnBGView.isHidden = true
+        pdfBtn.isHidden = true
+
+        view.layoutIfNeeded()
+
+        let renderer = UIGraphicsImageRenderer(size: view.bounds.size)
+
+        let image = renderer.image { _ in
+            view.drawHierarchy(in: view.bounds, afterScreenUpdates: true)
+        }
+
+        HeaderView.isHidden = headerHidden
+        statusView.isHidden = statusHidden
+        scoreLabelBGView.isHidden = scoreHidden
+        hintAndNextBtnBGView.isHidden = hintHidden
+        pdfBtn.isHidden = pdfHidden
+
+        view.layoutIfNeeded()
+
+        let pdfURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("FunDaysOfTheWeek.pdf")
+
+        let pdfRenderer = UIGraphicsPDFRenderer(
+            bounds: CGRect(origin: .zero, size: image.size)
+        )
+
+        do {
+
+            try pdfRenderer.writePDF(to: pdfURL) { context in
+
+                context.beginPage()
+
+                image.draw(in: CGRect(origin: .zero, size: image.size))
+            }
+
+            return pdfURL
+
+        } catch {
+
+            print(error)
+            return nil
+        }
+    }
+    
     // MARK: - HINT / NEXT
     @IBAction func hintAndNextTapBtn(_ sender: UIButton) {
 
@@ -539,4 +591,21 @@ class FunDaysOfTheWeekVC: BaseViewController {
             flashlockedDayItem(item, color: customPurpleColor)
         }
     }
+    
+    @IBAction func pdfTapBtn(_ sender: UIButton) {
+
+        guard let pdfURL = createPDF() else { return }
+
+        let activityVC = UIActivityViewController(
+            activityItems: [pdfURL],
+            applicationActivities: nil
+        )
+
+        if let popover = activityVC.popoverPresentationController {
+            popover.sourceView = sender
+        }
+
+        present(activityVC, animated: true)
+    }
+    
 }

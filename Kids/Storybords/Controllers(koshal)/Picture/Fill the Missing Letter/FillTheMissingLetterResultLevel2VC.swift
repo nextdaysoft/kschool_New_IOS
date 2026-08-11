@@ -71,12 +71,6 @@ class FillTheMissingLetterResultLevel2VC: BaseViewController {
             bgViews[i]?.layer.cornerRadius = 15
             bgViews[i]?.layer.borderWidth = 3
 
-            if UserDefaults.standard.bool(forKey: "WhiteTheme") {
-                bgViews[i]?.backgroundColor = .white
-            } else {
-                bgViews[i]?.backgroundColor = ColorManager.randomColor()
-            }
-            
             if result.isCorrect {
                 labels[i]?.text = "\(result.correctWord)"
                 bgViews[i]?.layer.borderColor = UIColor.systemGreen.cgColor
@@ -109,23 +103,14 @@ class FillTheMissingLetterResultLevel2VC: BaseViewController {
 
             HeaderView.backgroundColor = .white
             statusView.backgroundColor = .white
-
             nextBtn.backgroundColor = .white
-            nextBtn.setTitleColor(.black, for: .normal)
-
-            scoreBGVIew.backgroundColor = .white
-
         } else {
 
             let color = ColorManager.randomColor()
 
             HeaderView.backgroundColor = color
             statusView.backgroundColor = color
-
             nextBtn.backgroundColor = color
-            nextBtn.setTitleColor(.white, for: .normal)
-
-            scoreBGVIew.backgroundColor = color
         }
     }
   

@@ -4,6 +4,11 @@
 //
 //  Created by NextDay Sotware Solution on 19/01/26.
 //
+struct PDFQuestion {
+    let left: Int
+    let right: Int
+    let isPlus: Bool
+}
 
 import UIKit
 import LanguageManager_iOS
@@ -31,6 +36,9 @@ class AdditionSubstraction: BaseViewController {
     @IBOutlet weak var HeaderView: UIView!
     @IBOutlet weak var scoreViewTopConstraint: NSLayoutConstraint!
     @IBOutlet weak var statusView: UIView!
+    
+    @IBOutlet weak var pdfBtn: UIButton!
+     
     // MARK: Variable
     private var keys: [KeypadItem] = []
     var isPlus = false // true → after, false → before
@@ -109,22 +117,18 @@ class AdditionSubstraction: BaseViewController {
     }
     // Set up keys
     func setupKeys() {
-
-        let whiteTheme = UserDefaults.standard.bool(forKey: "WhiteTheme")
-
-        let keypadColor: UIColor = whiteTheme ? .white : ColorManager.randomColor()
-
+        
         keys = [
-            KeypadItem(title: "1", color: keypadColor),
-            KeypadItem(title: "2", color: keypadColor),
-            KeypadItem(title: "3", color: keypadColor),
-            KeypadItem(title: "4", color: keypadColor),
-            KeypadItem(title: "5", color: keypadColor),
-            KeypadItem(title: "6", color: keypadColor),
-            KeypadItem(title: "7", color: keypadColor),
-            KeypadItem(title: "8", color: keypadColor),
-            KeypadItem(title: "9", color: keypadColor),
-            KeypadItem(title: "0", color: keypadColor),
+            KeypadItem(title: "1", color: ColorManager.randomColor()),
+            KeypadItem(title: "2", color: ColorManager.randomColor()),
+            KeypadItem(title: "3", color: ColorManager.randomColor()),
+            KeypadItem(title: "4", color: ColorManager.randomColor()),
+            KeypadItem(title: "5", color: ColorManager.randomColor()),
+            KeypadItem(title: "6", color: ColorManager.randomColor()),
+            KeypadItem(title: "7", color: ColorManager.randomColor()),
+            KeypadItem(title: "8", color: ColorManager.randomColor()),
+            KeypadItem(title: "9", color: ColorManager.randomColor()),
+            KeypadItem(title: "0", color: ColorManager.randomColor()),
             KeypadItem(title: "X", color: .systemRed)
         ]
     }
@@ -135,11 +139,7 @@ class AdditionSubstraction: BaseViewController {
 
             HeaderView.backgroundColor = .white
             statusView.backgroundColor = .white
-
-            scoreView.backgroundColor = .white
-
             btnNext.backgroundColor = .white
-            btnNext.setTitleColor(.black, for: .normal)
 
         } else {
 
@@ -147,11 +147,7 @@ class AdditionSubstraction: BaseViewController {
 
             HeaderView.backgroundColor = color
             statusView.backgroundColor = color
-
-            scoreView.backgroundColor = color
-
             btnNext.backgroundColor = color
-            btnNext.setTitleColor(.white, for: .normal)
         }
 
         setupKeys()
@@ -208,6 +204,7 @@ class AdditionSubstraction: BaseViewController {
 
     // Function core
     func generateQuestion() {
+
         isAnswered = false
         userInput = ""
         lblAnswer.text = ""
@@ -216,12 +213,13 @@ class AdditionSubstraction: BaseViewController {
         btnNext.isHidden = true
         resultImage.isHidden = true
         resetScoreViewPosition()
+
         leftNumber = Int.random(in: 1...100)
         rightNumber = Int.random(in: 1...100)
-        //
+
         scoreViewTopConstraint.constant = originalScoreTopConstant
         collHeight.constant = 0
-//
+
         // SUBTRACTION: avoid negative answers
         if !isPlus && rightNumber > leftNumber {
             swap(&leftNumber, &rightNumber)
@@ -240,6 +238,8 @@ class AdditionSubstraction: BaseViewController {
 
         lblQuestionNumber.text = "\("Question".localiz()) \(questionIndex)"
     }
+    
+    
     func checkAnswer() {
         guard let entered = Int(userInput) else { return }
 
@@ -355,7 +355,76 @@ class AdditionSubstraction: BaseViewController {
             navigationController?.pushViewController(vc, animated: true)
         }
     }
+    
+    func createPDF() -> URL? {
 
+        let pdfURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("\(isPlus ? "Addition" : "Subtraction").pdf")
+
+        let pageWidth: CGFloat = 595
+        let pageHeight: CGFloat = 842
+
+        let renderer = UIGraphicsPDFRenderer(
+            bounds: CGRect(x: 0, y: 0, width: pageWidth, height: pageHeight)
+        )
+
+        do {
+
+            try renderer.writePDF(to: pdfURL) { context in
+
+                context.beginPage()
+
+                let title = isPlus ? "Addition" : "Subtraction"
+
+                title.draw(
+                    in: CGRect(x: 20, y: 20, width: pageWidth - 40, height: 35),
+                    withAttributes: [
+                        .font: UIFont.boldSystemFont(ofSize: 24),
+                        .foregroundColor: UIColor.black
+                    ]
+                )
+
+                var y: CGFloat = 90
+
+                for _ in 0..<10 {
+
+                    var left = Int.random(in: 1...100)
+                    var right = Int.random(in: 1...100)
+
+                    // subtraction me negative answer na aaye
+                    if !isPlus && right > left {
+                        swap(&left, &right)
+                    }
+
+                    let sign = isPlus ? "+" : "-"
+
+                    let text = "\(left)   \(sign)   \(right)   =   ______"
+
+                    (text as NSString).draw(
+                        at: CGPoint(x: 110, y: y),
+                        withAttributes: [
+                            .font: UIFont.systemFont(ofSize: 28)
+                        ]
+                    )
+
+                    y += 60
+
+                    if y > 760 {
+                        context.beginPage()
+                        y = 60
+                    }
+                }
+            }
+
+            return pdfURL
+
+        } catch {
+            print(error)
+            return nil
+        }
+    }
+    
+    
     // MARK: Action
     @IBAction func btnBackAction(_ sender: Any) {
         self.navigationController?.popViewController(animated: true)
@@ -382,6 +451,22 @@ class AdditionSubstraction: BaseViewController {
             btnNext.setTitle("Submit", for: .normal)
             generateQuestion()
         }
+    }
+    
+    @IBAction func pdfTapBtn(_ sender: UIButton) {
+
+        guard let pdfURL = createPDF() else { return }
+
+        let activityVC = UIActivityViewController(
+            activityItems: [pdfURL],
+            applicationActivities: nil
+        )
+
+        if let popover = activityVC.popoverPresentationController {
+            popover.sourceView = sender
+        }
+
+        present(activityVC, animated: true)
     }
 
 }

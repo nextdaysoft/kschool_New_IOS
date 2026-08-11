@@ -35,6 +35,8 @@ class PickTheCorrectOptionLevel1VC: BaseViewController {
     @IBOutlet weak var HeaderView: UIView!
     @IBOutlet weak var statusView: UIView!
 
+    @IBOutlet weak var pdfBtn: UIButton!
+    
     var questions: [PickQuestion] = [
         PickQuestion(imageName: "cow", sentence: "A cow gives us".localiz(), option1: "Milk".localiz(), option2: "Juice".localiz(), correctAnswer: "Milk".localiz()),
         
@@ -119,19 +121,11 @@ class PickTheCorrectOptionLevel1VC: BaseViewController {
             statusView.backgroundColor = .white
 
             nextBtn.backgroundColor = .white
-            nextBtn.setTitleColor(.black, for: .normal)
-
-            scoreLabelBGView.backgroundColor = .white
-            imgBGView.backgroundColor = .white
 
             nama1Btn.backgroundColor = .white
             nama2Btn.backgroundColor = .white
 
-            nama1Btn.setTitleColor(.black, for: .normal)
-            nama2Btn.setTitleColor(.black, for: .normal)
-
             defaultOptionBGColor = .white
-            defaultOptionTextColor = .black
 
         } else {
 
@@ -141,22 +135,38 @@ class PickTheCorrectOptionLevel1VC: BaseViewController {
             statusView.backgroundColor = color
 
             nextBtn.backgroundColor = color
-            nextBtn.setTitleColor(.white, for: .normal)
-
-            scoreLabelBGView.backgroundColor = color
-            imgBGView.backgroundColor = .white
 
             nama1Btn.backgroundColor = ColorManager.randomColor()
             nama2Btn.backgroundColor = ColorManager.randomColor()
 
-            nama1Btn.setTitleColor(.white, for: .normal)
-            nama2Btn.setTitleColor(.white, for: .normal)
-
             defaultOptionBGColor = nama1Btn.backgroundColor
-            defaultOptionTextColor = .white
         }
     }
 
+    func resetOptionButtons() {
+
+        if UserDefaults.standard.bool(forKey: "WhiteTheme") {
+
+            [nama1Btn, nama2Btn].forEach {
+                $0?.backgroundColor = .white
+            }
+
+        } else {
+
+            let colors = [
+                ColorManager.randomColor(),
+                ColorManager.randomColor()
+            ]
+
+            let buttons = [nama1Btn, nama2Btn]
+
+            for (button, color) in zip(buttons, colors) {
+                button?.backgroundColor = color
+            }
+        }
+    }
+    
+    
     // MARK: - Load Question
     func loadQuestion() {
 
@@ -216,7 +226,6 @@ class PickTheCorrectOptionLevel1VC: BaseViewController {
         if isCorrect {
 
             tappedButton.backgroundColor = .systemGreen
-            tappedButton.setTitleColor(.white, for: .normal)
 
             rightOrWrongImgView.image = UIImage(named: "check mark")
 
@@ -225,45 +234,18 @@ class PickTheCorrectOptionLevel1VC: BaseViewController {
         } else {
 
             tappedButton.backgroundColor = .systemRed
-            tappedButton.setTitleColor(.white, for: .normal)
 
             rightOrWrongImgView.image = UIImage(named: "close")
 
             if otherButton.title(for: .normal) == q.correctAnswer {
 
                 otherButton.backgroundColor = .systemGreen
-                otherButton.setTitleColor(.white, for: .normal)
             }
         }
 
         scoreLabel.text = "\("Score".localiz()): \(score) / \(currentIndex + 1)"
 
         nextBtn.isHidden = false
-    }
-
-    func resetOptionButtons() {
-
-        if UserDefaults.standard.bool(forKey: "WhiteTheme") {
-
-            [nama1Btn, nama2Btn].forEach {
-                $0?.backgroundColor = .white
-                $0?.setTitleColor(.black, for: .normal)
-            }
-
-        } else {
-
-            let colors = [
-                ColorManager.randomColor(),
-                ColorManager.randomColor()
-            ]
-
-            let buttons = [nama1Btn, nama2Btn]
-
-            for (button, color) in zip(buttons, colors) {
-                button?.backgroundColor = color
-                button?.setTitleColor(.white, for: .normal)
-            }
-        }
     }
     
     // MARK: Action
@@ -311,4 +293,126 @@ class PickTheCorrectOptionLevel1VC: BaseViewController {
             navigationController?.pushViewController(vc, animated: true)
         }
     }
+    
+    func createPDF() -> URL? {
+
+        let pdfURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("Pick The Correct Option.pdf")
+
+        view.layoutIfNeeded()
+
+        // MARK: Capture imgBGView + Option Buttons
+        var captureRect = imgBGView.superview!.convert(imgBGView.frame, to: view)
+
+        captureRect = captureRect.union(
+            nama1Btn.superview!.convert(nama1Btn.frame, to: view)
+        )
+
+        captureRect = captureRect.union(
+            nama2Btn.superview!.convert(nama2Btn.frame, to: view)
+        )
+
+        captureRect = captureRect.insetBy(dx: -10, dy: -10)
+
+        let renderer = UIGraphicsImageRenderer(size: captureRect.size)
+
+        let image = renderer.image { _ in
+            view.drawHierarchy(
+                in: CGRect(
+                    x: -captureRect.origin.x,
+                    y: -captureRect.origin.y,
+                    width: view.bounds.width,
+                    height: view.bounds.height
+                ),
+                afterScreenUpdates: true
+            )
+        }
+
+        let pageRect = CGRect(x: 0, y: 0, width: 595, height: 842)
+
+        let pdfRenderer = UIGraphicsPDFRenderer(bounds: pageRect)
+
+        do {
+
+            try pdfRenderer.writePDF(to: pdfURL) { context in
+
+                context.beginPage()
+
+                // Title
+                let title = "Pick The Correct Option"
+                let titleAttr: [NSAttributedString.Key: Any] = [
+                    .font: UIFont.boldSystemFont(ofSize: 24)
+                ]
+
+                let titleSize = title.size(withAttributes: titleAttr)
+
+                title.draw(
+                    at: CGPoint(
+                        x: (pageRect.width - titleSize.width) / 2,
+                        y: 20
+                    ),
+                    withAttributes: titleAttr
+                )
+
+                // Subtitle
+                let subtitle = ""
+                let subtitleAttr: [NSAttributedString.Key: Any] = [
+                    .font: UIFont.systemFont(ofSize: 18)
+                ]
+
+                let subtitleSize = subtitle.size(withAttributes: subtitleAttr)
+
+                subtitle.draw(
+                    at: CGPoint(
+                        x: (pageRect.width - subtitleSize.width) / 2,
+                        y: 55
+                    ),
+                    withAttributes: subtitleAttr
+                )
+
+                let top: CGFloat = 100
+
+                let scale = min(
+                    (pageRect.width - 40) / image.size.width,
+                    (pageRect.height - top - 20) / image.size.height
+                )
+
+                let width = image.size.width * scale
+                let height = image.size.height * scale
+
+                image.draw(
+                    in: CGRect(
+                        x: (pageRect.width - width) / 2,
+                        y: top,
+                        width: width,
+                        height: height
+                    )
+                )
+            }
+
+            return pdfURL
+
+        } catch {
+
+            print(error)
+            return nil
+        }
+    }
+    
+    @IBAction func pdfTapBtn(_ sender: UIButton) {
+
+        guard let pdfURL = createPDF() else { return }
+
+        let activityVC = UIActivityViewController(
+            activityItems: [pdfURL],
+            applicationActivities: nil
+        )
+
+        if let popover = activityVC.popoverPresentationController {
+            popover.sourceView = sender
+        }
+
+        present(activityVC, animated: true)
+    }
+    
 }

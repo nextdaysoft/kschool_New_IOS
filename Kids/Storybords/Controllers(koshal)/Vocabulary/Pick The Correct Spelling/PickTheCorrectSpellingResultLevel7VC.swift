@@ -67,12 +67,6 @@ class PickTheCorrectSpellingResultLevel7VC: BaseViewController {
 
             bgViews[i]?.layer.cornerRadius = 12
             bgViews[i]?.layer.borderWidth = 3
-
-            if UserDefaults.standard.bool(forKey: "WhiteTheme") {
-                bgViews[i]?.backgroundColor = .white
-            } else {
-                bgViews[i]?.backgroundColor = ColorManager.randomColor()
-            }
             
             if result.isCorrect {
                 labels[i]?.text = result.correctWord

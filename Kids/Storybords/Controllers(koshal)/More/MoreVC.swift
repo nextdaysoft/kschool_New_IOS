@@ -45,6 +45,9 @@ class MoreVC: BaseViewController {
         viewBG4.layer.borderColor = UIColor.black.cgColor
         viewBG5.layer.borderColor = UIColor.black.cgColor
         viewBG6.layer.borderColor = UIColor.black.cgColor
+        
+        viewBG3.isHidden = true
+        viewBG6.isHidden = true
     }
     
     func applyTheme() {

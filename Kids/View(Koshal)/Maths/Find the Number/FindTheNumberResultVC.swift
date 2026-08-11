@@ -73,7 +73,6 @@ class FindTheNumberResultVC: BaseViewController {
             scoreBGView.backgroundColor = .white
 
             nextBtn.backgroundColor = .white
-            nextBtn.setTitleColor(.black, for: .normal)
 
         } else {
 
@@ -85,7 +84,6 @@ class FindTheNumberResultVC: BaseViewController {
             scoreBGView.backgroundColor = color
 
             nextBtn.backgroundColor = color
-            nextBtn.setTitleColor(.white, for: .normal)
         }
     }
     

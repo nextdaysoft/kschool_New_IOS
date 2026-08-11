@@ -181,18 +181,12 @@ class IsAmAreVC: BaseViewController {
             statusView.backgroundColor = .white
 
             nextBtn.backgroundColor = .white
-            nextBtn.setTitleColor(.black, for: .normal)
-
+        
             scoreLabelBGView.backgroundColor = .white
-            imgBGView.backgroundColor = .white
 
             nama1Btn.backgroundColor = .white
             nama2Btn.backgroundColor = .white
             nama3Btn.backgroundColor = .white
-
-            nama1Btn.setTitleColor(.black, for: .normal)
-            nama2Btn.setTitleColor(.black, for: .normal)
-            nama3Btn.setTitleColor(.black, for: .normal)
 
             defaultBGColor = .white
             defaultTextColor = .black
@@ -205,21 +199,15 @@ class IsAmAreVC: BaseViewController {
             statusView.backgroundColor = color
 
             nextBtn.backgroundColor = color
-            nextBtn.setTitleColor(.white, for: .normal)
 
             scoreLabelBGView.backgroundColor = color
-            imgBGView.backgroundColor = .white
 
             nama1Btn.backgroundColor = ColorManager.randomColor()
             nama2Btn.backgroundColor = ColorManager.randomColor()
             nama3Btn.backgroundColor = ColorManager.randomColor()
 
-            nama1Btn.setTitleColor(.white, for: .normal)
-            nama2Btn.setTitleColor(.white, for: .normal)
-            nama3Btn.setTitleColor(.white, for: .normal)
-
             defaultBGColor = nama1Btn.backgroundColor
-            defaultTextColor = .white
+            defaultTextColor = .black
         }
     }
     
@@ -244,7 +232,7 @@ class IsAmAreVC: BaseViewController {
 
             for (button, color) in zip(buttons, colors) {
                 button?.backgroundColor = color
-                button?.setTitleColor(.white, for: .normal)
+                button?.setTitleColor(defaultTextColor, for: .normal)
             }
         }
     }
@@ -302,12 +290,12 @@ class IsAmAreVC: BaseViewController {
         for btn in buttons {
             if btn?.title(for: .normal) == selected {
                 btn?.backgroundColor = isCorrect ? .systemGreen : .systemRed
-                btn?.setTitleColor(.white, for: .normal)
+                btn?.setTitleColor(defaultTextColor, for: .normal)
             }
 
             if !isCorrect && btn?.title(for: .normal) == q.correctAnswer {
                 btn?.backgroundColor = .systemGreen
-                btn?.setTitleColor(.white, for: .normal)
+                btn?.setTitleColor(defaultTextColor, for: .normal)
             }
         }
 

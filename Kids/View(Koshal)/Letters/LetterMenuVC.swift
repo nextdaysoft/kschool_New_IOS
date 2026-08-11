@@ -597,21 +597,28 @@ class LetterMenuVC: BaseViewController {
     @IBAction func level1TapBtn(_ sender: UIButton) {
 
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
+
         let vc = storyboard.instantiateViewController(
             withIdentifier: "DrawLetters"
         ) as! DrawLetters
+
         vc.screenTitleText = "Capital Letter"
-        navigationController?.pushViewController(vc, animated: true)
+        vc.letterStyle = .normal
+
+        navigationController?.pushViewController(
+            vc,
+            animated: true
+        )
     }
     
     @IBAction func level2TapBtn(_ sender: UIButton) {
 
-//        guard SubscriptionManager.shared.isSubscribed()
-//        else{
-//
-//            goToSubscription()
-//            return
-//        }
+        guard SubscriptionManager.shared.isSubscribed()
+        else{
+
+            goToSubscription()
+            return
+        }
 
         let storyboard = UIStoryboard(
             name: "Main",
@@ -648,8 +655,8 @@ class LetterMenuVC: BaseViewController {
             animated: true
         )
     }
-
-
+    
+    
     @IBAction func level4TapBtn(_ sender: UIButton) {
 
         guard SubscriptionManager.shared.isSubscribed() else {
@@ -658,17 +665,17 @@ class LetterMenuVC: BaseViewController {
         }
 
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
+
         let vc = storyboard.instantiateViewController(
             withIdentifier: "DrawLetters"
         ) as! DrawLetters
 
         vc.letterStyle = .cursive
         vc.screenTitleText = "Capital Cursive Letter"
-        
+
         navigationController?.pushViewController(
             vc,
             animated: true
-
         )
     }
     

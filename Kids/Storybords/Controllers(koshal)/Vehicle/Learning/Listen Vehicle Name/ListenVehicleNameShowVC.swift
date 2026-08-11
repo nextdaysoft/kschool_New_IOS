@@ -25,6 +25,8 @@ class ListenVehicleNameShowVC: BaseViewController,AVSpeechSynthesizerDelegate {
     
     @IBOutlet weak var LevelLabel: UILabel!
     
+    @IBOutlet weak var pdfBtn: UIButton!
+    
     var planets: [LearnPlanetsItem] = []
     
     var speechSynthesizer = AVSpeechSynthesizer()
@@ -775,6 +777,225 @@ class ListenVehicleNameShowVC: BaseViewController,AVSpeechSynthesizerDelegate {
         imgBGView.layer.borderColor = randomColor.cgColor
     }
     
+    func createFruitsPDF() -> URL? {
+
+        let pdfURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("ListenVehicleName.pdf")
+
+        let pageWidth: CGFloat = 595
+        let pageHeight: CGFloat = 842
+
+        let renderer = UIGraphicsPDFRenderer(
+            bounds: CGRect(
+                x: 0,
+                y: 0,
+                width: pageWidth,
+                height: pageHeight
+            )
+        )
+
+        do {
+
+            try renderer.writePDF(to: pdfURL) { context in
+
+                // MARK: - PDF Settings
+
+                let marginX: CGFloat = 35
+                let topMargin: CGFloat = 90
+
+                let cardWidth: CGFloat = 250
+                let cardHeight: CGFloat = 175
+
+                let horizontalSpacing: CGFloat = 25
+                let verticalSpacing: CGFloat = 25
+
+                let imageAreaHeight: CGFloat = 120
+                let barHeight: CGFloat = 45
+
+                let columns = 2
+
+                var currentColumn = 0
+                var currentRow = 0
+
+                // MARK: - Start First Page
+
+                context.beginPage()
+
+                // MARK: - Title
+
+                let title = "Listen Vehicle Name"
+
+                let titleAttributes: [NSAttributedString.Key: Any] = [
+                    .font: UIFont.boldSystemFont(ofSize: 28),
+                    .foregroundColor: UIColor.black
+                ]
+
+                let titleSize = title.size(withAttributes: titleAttributes)
+
+                title.draw(
+                    at: CGPoint(
+                        x: (pageWidth - titleSize.width) / 2,
+                        y: 30
+                    ),
+                    withAttributes: titleAttributes
+                )
+
+                // MARK: - Helper: Aspect Fit Image
+
+                func aspectFitRect(
+                    imageSize: CGSize,
+                    inside rect: CGRect
+                ) -> CGRect {
+
+                    guard imageSize.width > 0 && imageSize.height > 0 else {
+                        return rect
+                    }
+
+                    let widthRatio = rect.width / imageSize.width
+                    let heightRatio = rect.height / imageSize.height
+
+                    let scale = min(widthRatio, heightRatio)
+
+                    let newWidth = imageSize.width * scale
+                    let newHeight = imageSize.height * scale
+
+                    return CGRect(
+                        x: rect.midX - newWidth / 2,
+                        y: rect.midY - newHeight / 2,
+                        width: newWidth,
+                        height: newHeight
+                    )
+                }
+
+                // MARK: - Draw Cards
+
+                for (index, item) in planets.enumerated() {
+
+                    // Calculate position
+
+                    let x = marginX +
+                        CGFloat(currentColumn) *
+                        (cardWidth + horizontalSpacing)
+
+                    let y = topMargin +
+                        CGFloat(currentRow) *
+                        (cardHeight + verticalSpacing)
+
+                    let cardRect = CGRect(
+                        x: x,
+                        y: y,
+                        width: cardWidth,
+                        height: cardHeight
+                    )
+
+                    // MARK: - Card Background
+
+                    let cardPath = UIBezierPath(
+                        roundedRect: cardRect,
+                        cornerRadius: 12
+                    )
+
+                    UIColor.white.setFill()
+                    cardPath.fill()
+
+                    UIColor.lightGray.setStroke()
+                    cardPath.lineWidth = 1
+                    cardPath.stroke()
+
+                    // MARK: - Image Area
+
+                    let imageArea = CGRect(
+                        x: cardRect.minX + 15,
+                        y: cardRect.minY + 8,
+                        width: cardRect.width - 30,
+                        height: imageAreaHeight
+                    )
+
+                    if let image = UIImage(named: item.imageName) {
+
+                        // Preserve original image ratio
+                        let imageRect = aspectFitRect(
+                            imageSize: image.size,
+                            inside: imageArea
+                        )
+
+                        image.draw(in: imageRect)
+                    }
+
+                    // MARK: - Bottom Color Bar
+
+                    let barRect = CGRect(
+                        x: cardRect.minX,
+                        y: cardRect.maxY - barHeight,
+                        width: cardRect.width,
+                        height: barHeight
+                    )
+
+                    let barPath = UIBezierPath(
+                        roundedRect: barRect,
+                        byRoundingCorners: [.bottomLeft, .bottomRight],
+                        cornerRadii: CGSize(width: 12, height: 12)
+                    )
+
+                    ColorManager.randomColor().setFill()
+                    barPath.fill()
+
+                    // MARK: - Vehicle Name
+
+                    let paragraphStyle = NSMutableParagraphStyle()
+                    paragraphStyle.alignment = .center
+                    paragraphStyle.lineBreakMode = .byWordWrapping
+
+                    let textAttributes: [NSAttributedString.Key: Any] = [
+                        .font: UIFont.boldSystemFont(ofSize: 15),
+                        .foregroundColor: UIColor.black,
+                        .paragraphStyle: paragraphStyle
+                    ]
+
+                    let textRect = CGRect(
+                        x: barRect.minX + 8,
+                        y: barRect.minY + 5,
+                        width: barRect.width - 16,
+                        height: barRect.height - 10
+                    )
+
+                    (item.text as NSString).draw(
+                        in: textRect,
+                        withAttributes: textAttributes
+                    )
+
+                    // MARK: - Next Card Position
+
+                    currentColumn += 1
+
+                    if currentColumn >= columns {
+
+                        currentColumn = 0
+                        currentRow += 1
+                    }
+
+                    // MARK: - New Page
+
+                    if currentRow >= 3 && index < planets.count - 1 {
+
+                        context.beginPage()
+
+                        // Reset position
+                        currentColumn = 0
+                        currentRow = 0
+                    }
+                }
+            }
+
+            return pdfURL
+
+        } catch {
+
+            print("PDF Error: \(error)")
+            return nil
+        }
+    }
+    
     
     @IBAction func repeatTapBtn(_ sender: UIButton) {
         speak(text: planets[currentIndex].text)
@@ -784,5 +1005,20 @@ class ListenVehicleNameShowVC: BaseViewController,AVSpeechSynthesizerDelegate {
         self.navigationController?.popViewController(animated: true)
     }
     
+    @IBAction func pdfTapBtn(_ sender: UIButton) {
+
+        guard let pdfURL = createFruitsPDF() else { return }
+
+        let activityVC = UIActivityViewController(
+            activityItems: [pdfURL],
+            applicationActivities: nil
+        )
+
+        if let popover = activityVC.popoverPresentationController {
+            popover.sourceView = sender
+        }
+
+        present(activityVC, animated: true)
+    }
  
 }

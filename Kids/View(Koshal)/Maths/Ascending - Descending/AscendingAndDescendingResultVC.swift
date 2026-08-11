@@ -40,6 +40,9 @@ class AscendingAndDescendingResultVC: BaseViewController {
     @IBOutlet weak var scoreLbl: UILabel!
     @IBOutlet weak var scoreBGView: UIView!
     
+    @IBOutlet weak var pdfBtn: UIButton!
+    
+    var viewColors: [UIColor] = []
     
     var userOrder: [String] = []
     var correctOrder: [String] = []
@@ -90,31 +93,35 @@ class AscendingAndDescendingResultVC: BaseViewController {
     }
     
     func applyTheme() {
-
+        
         if UserDefaults.standard.bool(forKey: "WhiteTheme") {
-
+            
             HeaderView.backgroundColor = .white
             statusView.backgroundColor = .white
-
-            scoreBGView.backgroundColor = .white
-
             nextBtn.backgroundColor = .white
-            nextBtn.setTitleColor(.black, for: .normal)
-
+            
+            view1.backgroundColor = .white
+            view2.backgroundColor = .white
+            view3.backgroundColor = .white
+            view4.backgroundColor = .white
+            
         } else {
-
+            
             let color = ColorManager.randomColor()
-
+            
             HeaderView.backgroundColor = color
             statusView.backgroundColor = color
-
-            scoreBGView.backgroundColor = color
-
+            
             nextBtn.backgroundColor = color
-            nextBtn.setTitleColor(.white, for: .normal)
+            
+            if viewColors.count == 4 {
+                view1.backgroundColor = viewColors[0]
+                view2.backgroundColor = viewColors[1]
+                view3.backgroundColor = viewColors[2]
+                view4.backgroundColor = viewColors[3]
+            }
         }
     }
-    
     func setCornerRadius() {
         let views = [view1, view2, view3, view4]
         
@@ -216,7 +223,13 @@ class AscendingAndDescendingResultVC: BaseViewController {
     
     // MARK: Action
     @IBAction func backBtnAction(_ sender: Any) {
-        goToMenu()
+
+        if let menuVC = navigationController?.viewControllers.last(where: {
+            $0 is AscendingAndDescendingMenuVC
+        }) {
+
+            navigationController?.popToViewController(menuVC, animated: true)
+        }
     }
     
  
@@ -252,6 +265,175 @@ class AscendingAndDescendingResultVC: BaseViewController {
             vc.levelNumber = self.levelNumber
             navigationController?.pushViewController(vc, animated: true)
         }
+    }
+    
+    func createPDF() -> URL? {
+
+        let pdfName = isAscending ? "Ascending Order" : "Descending Order"
+
+        let pdfURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("\(pdfName).pdf")
+
+        view.layoutIfNeeded()
+
+        // Capture all number views + result images
+        let captureViews: [UIView] = [
+            view1,
+            view2,
+            view3,
+            view4,
+            img1,
+            img2,
+            img3,
+            img4
+        ]
+
+        guard let firstView = captureViews.first else { return nil }
+
+        var captureRect = firstView.superview?.convert(firstView.frame, to: view) ?? firstView.frame
+
+        for item in captureViews.dropFirst() {
+
+            let rect: CGRect
+
+            if let superView = item.superview {
+                rect = superView.convert(item.frame, to: view)
+            } else {
+                rect = item.frame
+            }
+
+            captureRect = captureRect.union(rect)
+        }
+
+        // Extra padding so nothing gets cut
+        captureRect.origin.x -= 30
+        captureRect.origin.y -= 30
+        captureRect.size.width += 60
+        captureRect.size.height += 60
+
+        let renderer = UIGraphicsImageRenderer(size: captureRect.size)
+
+        let image = renderer.image { _ in
+
+            let hiddenViews: [UIView] = [
+                HeaderView,
+                statusView,
+                backBtn,
+                pdfBtn,
+                nextBtn,
+                titelLbl,
+                texLbl,
+                questionLbl,
+                scoreLbl,
+                scoreBGView
+            ]
+
+            hiddenViews.forEach { $0.isHidden = true }
+
+            self.view.layoutIfNeeded()
+
+            self.view.drawHierarchy(
+                in: CGRect(
+                    x: -captureRect.origin.x,
+                    y: -captureRect.origin.y,
+                    width: self.view.bounds.width,
+                    height: self.view.bounds.height
+                ),
+                afterScreenUpdates: true
+            )
+
+            hiddenViews.forEach { $0.isHidden = false }
+
+            self.view.layoutIfNeeded()
+        }
+
+        let pageWidth: CGFloat = 595
+        let pageHeight: CGFloat = 842
+
+        let pdfRenderer = UIGraphicsPDFRenderer(
+            bounds: CGRect(x: 0, y: 0, width: pageWidth, height: pageHeight)
+        )
+
+        do {
+
+            try pdfRenderer.writePDF(to: pdfURL) { context in
+
+                context.beginPage()
+
+                let title = isAscending
+                ? "Rearrange the numbers in ascending order."
+                : "Rearrange the numbers in descending order."
+
+                title.draw(
+                    in: CGRect(
+                        x: 20,
+                        y: 20,
+                        width: pageWidth - 40,
+                        height: 40
+                    ),
+                    withAttributes: [
+                        .font: UIFont.boldSystemFont(ofSize: 24),
+                        .foregroundColor: UIColor.black
+                    ]
+                )
+
+                let maxWidth = pageWidth - 40
+                let maxHeight = pageHeight - 90
+
+                let scale = min(
+                    maxWidth / image.size.width,
+                    maxHeight / image.size.height
+                )
+
+                let drawWidth = image.size.width * scale
+                let drawHeight = image.size.height * scale
+
+                image.draw(
+                    in: CGRect(
+                        x: (pageWidth - drawWidth) / 2,
+                        y: 80,
+                        width: drawWidth,
+                        height: drawHeight
+                    )
+                )
+            }
+
+            return pdfURL
+
+        } catch {
+
+            print(error)
+            return nil
+        }
+    }
+    
+    @IBAction func pdfTapBtn(_ sender: UIButton) {
+
+        let wasNextHidden = nextBtn.isHidden
+
+        nextBtn.isHidden = true
+        view.layoutIfNeeded()
+
+        guard let url = createPDF() else {
+
+            nextBtn.isHidden = wasNextHidden
+            view.layoutIfNeeded()
+            return
+        }
+
+        nextBtn.isHidden = wasNextHidden
+        view.layoutIfNeeded()
+
+        let activityVC = UIActivityViewController(
+            activityItems: [url],
+            applicationActivities: nil
+        )
+
+        if let pop = activityVC.popoverPresentationController {
+            pop.sourceView = sender
+        }
+
+        present(activityVC, animated: true)
     }
     
 }

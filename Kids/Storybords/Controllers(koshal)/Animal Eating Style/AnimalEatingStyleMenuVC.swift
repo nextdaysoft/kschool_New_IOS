@@ -64,7 +64,6 @@ class AnimalEatingStyleMenuVC: BaseViewController {
         quizView.layer.cornerRadius = 10
         
         viewBG1.isHidden = true
-        
         viewBG2.isHidden = true
     }
     

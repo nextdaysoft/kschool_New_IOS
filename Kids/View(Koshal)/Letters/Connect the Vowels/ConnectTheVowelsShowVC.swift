@@ -20,6 +20,9 @@ class ConnectTheVowelsShowVC: BaseViewController {
     @IBOutlet weak var HeaderView: UIView!
     @IBOutlet weak var statusView: UIView!
     
+    @IBOutlet weak var pdfBtn: UIButton!
+    
+    
     let speechSynth = AVSpeechSynthesizer()
     
     var gridViews: [[GridItemView]] = []
@@ -81,10 +84,7 @@ class ConnectTheVowelsShowVC: BaseViewController {
 
             HeaderView.backgroundColor = .white
             statusView.backgroundColor = .white
-
             gameBGView.backgroundColor = .white
-        
-
             themeColor = .white
 
         } else {
@@ -93,9 +93,7 @@ class ConnectTheVowelsShowVC: BaseViewController {
 
             HeaderView.backgroundColor = color
             statusView.backgroundColor = color
-
             gameBGView.backgroundColor = .clear
-
             themeColor = color
         }
 
@@ -107,20 +105,17 @@ class ConnectTheVowelsShowVC: BaseViewController {
         // Good Job & Next button update
         if goodJobLabel != nil && nextButton != nil {
 
+            goodJobLabel.backgroundColor = themeColor
+            nextButton.backgroundColor = themeColor
+
             if UserDefaults.standard.bool(forKey: "WhiteTheme") {
 
-                goodJobLabel.backgroundColor = .white
                 goodJobLabel.textColor = .black
-
-                nextButton.backgroundColor = .white
                 nextButton.setTitleColor(.black, for: .normal)
 
             } else {
 
-                goodJobLabel.backgroundColor = ColorManager.randomColor()
-                goodJobLabel.textColor = .white
-
-                nextButton.backgroundColor = ColorManager.randomColor()
+                goodJobLabel.textColor = .black   // ya .white agar chahiye
                 nextButton.setTitleColor(.black, for: .normal)
             }
         }
@@ -194,28 +189,34 @@ class ConnectTheVowelsShowVC: BaseViewController {
     
     func setupResultUI() {
         
-        // 🎉 Good Job Label
+        // Good Job Label
         goodJobLabel = UILabel()
         goodJobLabel.translatesAutoresizingMaskIntoConstraints = false
         goodJobLabel.text = "Good Job!".localiz()
         goodJobLabel.textAlignment = .center
         goodJobLabel.font = UIFont.systemFont(ofSize: 20, weight: .medium)
-        
-        goodJobLabel.textColor = .white   // ✅ white text
         goodJobLabel.isHidden = true
-        
+        goodJobLabel.layer.cornerRadius = 10
+        goodJobLabel.clipsToBounds = true
+        goodJobLabel.backgroundColor = themeColor
+
         view.addSubview(goodJobLabel)
-        
-        // 👉 Next Button
+
+
+        // Next Button
         nextButton = UIButton(type: .system)
         nextButton.translatesAutoresizingMaskIntoConstraints = false
         nextButton.setTitle("Next".localiz(), for: .normal)
         nextButton.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .regular)
-        nextButton.setTitleColor(.black, for: .normal)   // ✅ black text
         nextButton.isHidden = true
-        
+
+        nextButton.layer.cornerRadius = 10
+        nextButton.clipsToBounds = true
+        nextButton.backgroundColor = themeColor
+        nextButton.setTitleColor(.black, for: .normal)
+
         nextButton.addTarget(self, action: #selector(nextTapped), for: .touchUpInside)
-        
+
         view.addSubview(nextButton)
         
         NSLayoutConstraint.activate([
@@ -235,38 +236,38 @@ class ConnectTheVowelsShowVC: BaseViewController {
     }
     
     func handleWin() {
-        
+
         UserDefaults.standard.set(true, forKey: "connectTheVowelsLevel\(levelNumber)Completed")
-        
+
         controlStackView?.isHidden = true
-        
+
         goodJobLabel.isHidden = false
         nextButton.isHidden = false
-        
+
+        // Same color as HeaderView / StatusView
+        goodJobLabel.backgroundColor = themeColor
+        nextButton.backgroundColor = themeColor
+
+        // Text color
         if UserDefaults.standard.bool(forKey: "WhiteTheme") {
-
-            goodJobLabel.backgroundColor = .white
             goodJobLabel.textColor = .black
-
-            nextButton.backgroundColor = .white
             nextButton.setTitleColor(.black, for: .normal)
-
         } else {
-
-            goodJobLabel.backgroundColor = ColorManager.randomColor()
-            goodJobLabel.textColor = .white
-
-            nextButton.backgroundColor = ColorManager.randomColor()
+            goodJobLabel.textColor = .black   // Agar white text chahiye to .white kar sakte ho
             nextButton.setTitleColor(.black, for: .normal)
         }
-        
+
+        // Rounded corners
+        goodJobLabel.layer.cornerRadius = 10
+        goodJobLabel.clipsToBounds = true
+
         nextButton.layer.cornerRadius = 10
         nextButton.clipsToBounds = true
-        
-        // 🎬 animation
+
+        // Animation
         goodJobLabel.alpha = 0
         nextButton.alpha = 0
-        
+
         UIView.animate(withDuration: 0.3) {
             self.goodJobLabel.alpha = 1
             self.nextButton.alpha = 1
@@ -616,9 +617,89 @@ class ConnectTheVowelsShowVC: BaseViewController {
         nextButton.isHidden = true
     }
     
+    func createPDF() -> URL? {
+
+        let pdfURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("ConnectTheVowels.pdf")
+
+        let pageWidth: CGFloat = 595
+        let pageHeight: CGFloat = 842
+
+        let renderer = UIGraphicsPDFRenderer(
+            bounds: CGRect(x: 0, y: 0, width: pageWidth, height: pageHeight)
+        )
+
+        do {
+
+            try renderer.writePDF(to: pdfURL) { context in
+
+                context.beginPage()
+
+                // Title
+                let title = "Connect The Vowels"
+
+                let titleAttributes: [NSAttributedString.Key: Any] = [
+                    .font: UIFont.boldSystemFont(ofSize: 30),
+                    .foregroundColor: UIColor.black
+                ]
+
+                let titleSize = title.size(withAttributes: titleAttributes)
+
+                title.draw(
+                    at: CGPoint(
+                        x: (pageWidth - titleSize.width) / 2,
+                        y: 30
+                    ),
+                    withAttributes: titleAttributes
+                )
+
+                // Draw only game grid
+                let targetWidth: CGFloat = 500
+                let scale = targetWidth / gameBGView.bounds.width
+
+                let targetHeight = gameBGView.bounds.height * scale
+
+                let x = (pageWidth - targetWidth) / 2
+                let y: CGFloat = 100
+
+                context.cgContext.saveGState()
+
+                context.cgContext.translateBy(x: x, y: y)
+                context.cgContext.scaleBy(x: scale, y: scale)
+
+                gameBGView.layer.render(in: context.cgContext)
+
+                context.cgContext.restoreGState()
+            }
+
+            return pdfURL
+
+        } catch {
+
+            print(error)
+            return nil
+        }
+    }
+    
     @IBAction func backBtnAction(_ sender: Any) {
         self.navigationController?.popViewController(animated: true)
     }
     
+    
+    @IBAction func pdfTapBtn(_ sender: UIButton) {
+
+        guard let pdfURL = createPDF() else { return }
+
+        let activityVC = UIActivityViewController(
+            activityItems: [pdfURL],
+            applicationActivities: nil
+        )
+
+        if let popover = activityVC.popoverPresentationController {
+            popover.sourceView = sender
+        }
+
+        present(activityVC, animated: true)
+    }
     
 }

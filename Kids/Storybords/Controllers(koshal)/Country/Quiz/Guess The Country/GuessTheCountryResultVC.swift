@@ -35,14 +35,6 @@ class GuessTheCountryResultVC: BaseViewController {
             gifImage.sd_setImage(with: url)
         }
         
-        scoreBGVIew.layer.cornerRadius = 10
-        
-        nextBtn.layer.cornerRadius = 10
-        nextBtn.backgroundColor = ColorManager.randomColor()
-        nextBtn.layer.borderColor = UIColor.black.cgColor
-       
-        
-        
     }
 
     func setup(){
@@ -53,6 +45,9 @@ class GuessTheCountryResultVC: BaseViewController {
         backBtn.tintColor = #colorLiteral(red: 0.1718951762, green: 0.212508589, blue: 0.3281655014, alpha: 1)
         HeaderView.backgroundColor = color
         statusView.backgroundColor = color
+        scoreBGVIew.layer.cornerRadius = 6
+        nextBtn.layer.cornerRadius = 6
+        nextBtn.backgroundColor = color
     }
 
     @IBAction func backTapBtn(_ sender: UIButton) {
@@ -69,19 +64,22 @@ class GuessTheCountryResultVC: BaseViewController {
 
             let percentage = Int((Double(finalScore) / 10.0) * 100)
 
-            let completedKey = "guessFlagLevel\(levelNumber)Completed"
-            let percentageKey = "guessFlagLevel\(levelNumber)Percentage"
+            // ✅ Save completed status
+            UserDefaults.standard.set(true, forKey: "guessTheCountryLevel\(levelNumber)Completed")
 
-            var levelData = UserDefaults.standard.dictionary(forKey: "guessFlagLevelData") as? [String: Int] ?? [:]
+            // ✅ Save percentage
+            UserDefaults.standard.set(percentage, forKey: "guessTheCountryLevel\(levelNumber)Percentage")
+
+            // ✅ Save for menu
+            var levelData = UserDefaults.standard.dictionary(forKey: "guessTheCountryLevelData") as? [String: Int] ?? [:]
 
             levelData["\(levelNumber)"] = percentage
 
-            UserDefaults.standard.set(levelData, forKey: "guessFlagLevelData")
+            UserDefaults.standard.set(levelData, forKey: "guessTheCountryLevelData")
+            UserDefaults.standard.synchronize()
         }
 
-        if let menuVC = navigationController?.viewControllers.first(
-            where: { $0 is GuessTheCountryMenuVC }
-        ) {
+        if let menuVC = navigationController?.viewControllers.first(where: { $0 is GuessTheCountryMenuVC }) {
             navigationController?.popToViewController(menuVC, animated: true)
         }
     }

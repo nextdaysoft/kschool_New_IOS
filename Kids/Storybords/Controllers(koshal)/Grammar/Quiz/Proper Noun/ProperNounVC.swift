@@ -171,26 +171,22 @@ class ProperNounVC: BaseViewController {
     
     func resetButtons() {
 
-        if UserDefaults.standard.bool(forKey: "WhiteTheme") {
-
-            [nama1Btn, nama2Btn, nama3Btn].forEach {
-                $0?.backgroundColor = .white
-                $0?.setTitleColor(.black, for: .normal)
-            }
-
-        } else {
-
-            let colors = [
+        let colors = UserDefaults.standard.bool(forKey: "WhiteTheme")
+            ? [.white, .white, .white]
+            : [
                 ColorManager.randomColor(),
                 ColorManager.randomColor(),
                 ColorManager.randomColor()
             ]
 
-            let buttons = [nama1Btn, nama2Btn, nama3Btn]
+        let buttons = [nama1Btn, nama2Btn, nama3Btn]
 
-            for (button, color) in zip(buttons, colors) {
-                button?.backgroundColor = color
-                button?.setTitleColor(.white, for: .normal)
+        for (button, color) in zip(buttons, colors) {
+            button?.backgroundColor = color
+
+            // Storyboard me jo text color set hai wahi use hoga
+            if let defaultTextColor = defaultTextColor {
+                button?.setTitleColor(defaultTextColor, for: .normal)
             }
         }
     }
@@ -203,8 +199,7 @@ class ProperNounVC: BaseViewController {
             statusView.backgroundColor = .white
 
             nextBtn.backgroundColor = .white
-            nextBtn.setTitleColor(.black, for: .normal)
-
+            
             scoreLabelBGView.backgroundColor = .white
             imgBGView.backgroundColor = .white
 
@@ -212,12 +207,6 @@ class ProperNounVC: BaseViewController {
             nama2Btn.backgroundColor = .white
             nama3Btn.backgroundColor = .white
 
-            nama1Btn.setTitleColor(.black, for: .normal)
-            nama2Btn.setTitleColor(.black, for: .normal)
-            nama3Btn.setTitleColor(.black, for: .normal)
-
-            defaultBGColor = .white
-            defaultTextColor = .black
 
         } else {
 
@@ -227,8 +216,7 @@ class ProperNounVC: BaseViewController {
             statusView.backgroundColor = color
 
             nextBtn.backgroundColor = color
-            nextBtn.setTitleColor(.white, for: .normal)
-
+            
             scoreLabelBGView.backgroundColor = color
             imgBGView.backgroundColor = .white
 
@@ -236,12 +224,9 @@ class ProperNounVC: BaseViewController {
             nama2Btn.backgroundColor = ColorManager.randomColor()
             nama3Btn.backgroundColor = ColorManager.randomColor()
 
-            nama1Btn.setTitleColor(.white, for: .normal)
-            nama2Btn.setTitleColor(.white, for: .normal)
-            nama3Btn.setTitleColor(.white, for: .normal)
-
+    
             defaultBGColor = nama1Btn.backgroundColor
-            defaultTextColor = .white
+        
         }
     }
     
@@ -291,14 +276,15 @@ class ProperNounVC: BaseViewController {
         }
 
         for btn in buttons {
+
             if btn?.title(for: .normal) == selected {
                 btn?.backgroundColor = isCorrect ? .systemGreen : .systemRed
-                btn?.setTitleColor(.white, for: .normal)
+                btn?.setTitleColor(.black, for: .normal)
             }
 
             if !isCorrect && btn?.title(for: .normal) == q.correctAnswer {
                 btn?.backgroundColor = .systemGreen
-                btn?.setTitleColor(.white, for: .normal)
+                btn?.setTitleColor(.black, for: .normal)
             }
         }
        

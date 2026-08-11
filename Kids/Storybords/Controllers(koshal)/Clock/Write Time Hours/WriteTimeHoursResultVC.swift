@@ -75,11 +75,6 @@ class WriteTimeHoursResultVC: BaseViewController {
             bgViews[i]?.layer.cornerRadius = 15
             bgViews[i]?.layer.borderWidth = 3
 
-            if UserDefaults.standard.bool(forKey: "WhiteTheme") {
-                bgViews[i]?.backgroundColor = .white
-            } else {
-                bgViews[i]?.backgroundColor = ColorManager.randomColor()
-            }
             
             if result.isCorrect {
                 bgViews[i]?.layer.borderColor = UIColor.systemGreen.cgColor
@@ -110,9 +105,7 @@ class WriteTimeHoursResultVC: BaseViewController {
             statusView.backgroundColor = .white
 
             nextBtn.backgroundColor = .white
-            nextBtn.setTitleColor(.black, for: .normal)
-
-            scoreBGVIew.backgroundColor = .white
+          
 
         } else {
 
@@ -122,9 +115,7 @@ class WriteTimeHoursResultVC: BaseViewController {
             statusView.backgroundColor = color
 
             nextBtn.backgroundColor = color
-            nextBtn.setTitleColor(.white, for: .normal)
-
-            scoreBGVIew.backgroundColor = color
+          
         }
     }
 

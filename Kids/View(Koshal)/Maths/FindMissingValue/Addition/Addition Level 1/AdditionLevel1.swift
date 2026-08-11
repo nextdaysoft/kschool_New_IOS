@@ -41,6 +41,9 @@ class AdditionLevel1: BaseViewController {
     @IBOutlet weak var ansonedigit: UILabel!
     
     @IBOutlet weak var lineView: UIView!
+    
+    @IBOutlet weak var pdfBtn: UIButton!
+    
     private var keys: [KeypadItem] = []
     private var correctAnswer: Int = 0
     private var score: Int = 0
@@ -240,11 +243,7 @@ class AdditionLevel1: BaseViewController {
 
             HeaderView.backgroundColor = .white
             statusView.backgroundColor = .white
-
-            scoreView.backgroundColor = .white
-
             btnNext.backgroundColor = .white
-            btnNext.setTitleColor(.black, for: .normal)
 
         } else {
 
@@ -252,11 +251,7 @@ class AdditionLevel1: BaseViewController {
 
             HeaderView.backgroundColor = color
             statusView.backgroundColor = color
-
-            scoreView.backgroundColor = color
-
             btnNext.backgroundColor = color
-            btnNext.setTitleColor(.white, for: .normal)
         }
 
         // ✅ इनका रंग हमेशा Random ही रहेगा
@@ -330,30 +325,26 @@ class AdditionLevel1: BaseViewController {
 
         } else {
 
-            // Subtraction → 1 se 9 tak digits
+            // Simple subtraction (No Borrow)
 
-            repeat {
+            let topTens = Int.random(in: 2...9)
+            let bottomTens = Int.random(in: 1..<(topTens))
 
-                let firstTens = Int.random(in: 1...9)
-                let firstOnes = Int.random(in: 0...9)
+            let topOnes = Int.random(in: 0...9)
+            let bottomOnes = Int.random(in: 0...topOnes)
 
-                let secondTens = Int.random(in: 1...9)
-                let secondOnes = Int.random(in: 0...9)
-
-                leftNumber = firstTens * 10 + firstOnes
-                rightNumber = secondTens * 10 + secondOnes
-
-            } while leftNumber < rightNumber
+            leftNumber = topTens * 10 + topOnes
+            rightNumber = bottomTens * 10 + bottomOnes
 
             correctAnswer = leftNumber - rightNumber
 
             iconPlus.text = "-"
 
-            firstdigit.text = "\(leftNumber / 10)"
-            seconddigit.text = "\(leftNumber % 10)"
+            firstdigit.text = "\(topTens)"
+            seconddigit.text = "\(topOnes)"
 
-            thirddigit.text = "\(rightNumber / 10)"
-            fourthdigit.text = "\(rightNumber % 10)"
+            thirddigit.text = "\(bottomTens)"
+            fourthdigit.text = "\(bottomOnes)"
         }
 
         ansdigit.attributedText = nil
@@ -524,7 +515,8 @@ class AdditionLevel1: BaseViewController {
 
             vc.results = results
             vc.score = score
-
+            vc.mode = mode
+            
             navigationController?.pushViewController(vc, animated: true)
 
         } else {
@@ -532,6 +524,192 @@ class AdditionLevel1: BaseViewController {
             btnNext.setTitle("Submit", for: .normal)
             generateQuestion()
         }
+    }
+    
+    func createPDF() -> URL? {
+
+        let fileName: String
+
+        if mode == .addition {
+            fileName = "Addition.pdf"
+        } else {
+            fileName = "Subtraction.pdf"
+        }
+
+        let pdfURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent(fileName)
+
+        view.layoutIfNeeded()
+
+        // Save original hidden state
+        let hiddenViews: [(UIView, Bool)] = [
+            (HeaderView, HeaderView.isHidden),
+            (statusView, statusView.isHidden),
+            (backBtn, backBtn.isHidden),
+            (lblTitle, lblTitle.isHidden),
+            (lblQuestionNumber, lblQuestionNumber.isHidden),
+            (lblQuestion, lblQuestion.isHidden),
+            (scoreView, scoreView.isHidden),
+            (scoreMainView, scoreMainView.isHidden),
+            (btnNext, btnNext.isHidden),
+            (keyPad, keyPad.isHidden),
+            (pdfBtn, pdfBtn.isHidden)
+        ]
+
+        // Hide unwanted views
+        hiddenViews.forEach { view, _ in
+            view.isHidden = true
+        }
+
+        view.layoutIfNeeded()
+
+        // Capture only question area
+        let captureViews: [UIView] = [
+            iconPlus,
+            firstdigit,
+            seconddigit,
+            thirddigit,
+            fourthdigit,
+            carryView2,
+            carryView3,
+            ansdigit,
+            ansonedigit,
+            lineView
+        ]
+
+        guard let first = captureViews.first else {
+
+            hiddenViews.forEach { view, wasHidden in
+                view.isHidden = wasHidden
+            }
+
+            return nil
+        }
+
+        var captureRect = first.superview!.convert(first.frame, to: view)
+
+        for v in captureViews.dropFirst() {
+
+            let rect = v.superview!.convert(v.frame, to: view)
+            captureRect = captureRect.union(rect)
+        }
+
+        captureRect = captureRect.insetBy(dx: -30, dy: -30)
+
+        let renderer = UIGraphicsImageRenderer(size: captureRect.size)
+
+        let image = renderer.image { _ in
+
+            self.view.drawHierarchy(
+                in: CGRect(
+                    x: -captureRect.origin.x,
+                    y: -captureRect.origin.y,
+                    width: self.view.bounds.width,
+                    height: self.view.bounds.height
+                ),
+                afterScreenUpdates: true
+            )
+        }
+
+        // Restore original state
+        hiddenViews.forEach { view, wasHidden in
+            view.isHidden = wasHidden
+        }
+
+        view.layoutIfNeeded()
+
+        let pageWidth: CGFloat = 595
+        let pageHeight: CGFloat = 842
+
+        let pdfRenderer = UIGraphicsPDFRenderer(
+            bounds: CGRect(
+                x: 0,
+                y: 0,
+                width: pageWidth,
+                height: pageHeight
+            )
+        )
+
+        do {
+
+            try pdfRenderer.writePDF(to: pdfURL) { context in
+
+                context.beginPage()
+
+                let title = mode == .addition ? "Addition" : "Subtraction"
+
+                let paragraph = NSMutableParagraphStyle()
+                paragraph.alignment = .center
+
+                let attributes: [NSAttributedString.Key: Any] = [
+                    .font: UIFont.boldSystemFont(ofSize: 24),
+                    .foregroundColor: UIColor.black,
+                    .paragraphStyle: paragraph
+                ]
+
+                (title as NSString).draw(
+                    with: CGRect(
+                        x: 20,
+                        y: 20,
+                        width: pageWidth - 40,
+                        height: 40
+                    ),
+                    options: [.usesLineFragmentOrigin],
+                    attributes: attributes,
+                    context: nil
+                )
+
+                let maxWidth = pageWidth - 40
+                let maxHeight = pageHeight - 100
+
+                let scale = min(
+                    maxWidth / image.size.width,
+                    maxHeight / image.size.height
+                )
+
+                let drawWidth = image.size.width * scale
+                let drawHeight = image.size.height * scale
+
+                image.draw(
+                    in: CGRect(
+                        x: (pageWidth - drawWidth) / 2,
+                        y: 90,
+                        width: drawWidth,
+                        height: drawHeight
+                    )
+                )
+            }
+
+            return pdfURL
+
+        } catch {
+
+            // Restore state even on error
+            hiddenViews.forEach { view, wasHidden in
+                view.isHidden = wasHidden
+            }
+
+            view.layoutIfNeeded()
+
+            print(error)
+            return nil
+        }
+    }
+    
+    @IBAction func pdfTapBtn(_ sender: UIButton) {
+
+        guard let url = createPDF() else { return }
+
+        let activityVC = UIActivityViewController(
+            activityItems: [url],
+            applicationActivities: nil
+        )
+
+        if let pop = activityVC.popoverPresentationController {
+            pop.sourceView = sender
+        }
+
+        present(activityVC, animated: true)
     }
 
 }

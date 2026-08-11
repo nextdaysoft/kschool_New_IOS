@@ -9,7 +9,7 @@ import UIKit
 import LanguageManager_iOS
 
 class WirteTimeQuatersVC: BaseViewController {
-
+    
     @IBOutlet weak var backBtn: UIButton!
     @IBOutlet weak var HeaderView: UIView!
     @IBOutlet weak var statusView: UIView!
@@ -19,7 +19,7 @@ class WirteTimeQuatersVC: BaseViewController {
     @IBOutlet weak var nextBtn: UIButton!
     @IBOutlet weak var rightOrWrongImgView: UIImageView!
     @IBOutlet weak var clockBGView: UIView!
-
+    
     @IBOutlet weak var timeLabelBGView: UIView!
     @IBOutlet weak var timeLabel: UILabel!
     
@@ -50,9 +50,10 @@ class WirteTimeQuatersVC: BaseViewController {
     @IBOutlet weak var btnColonBGView: UIView!
     @IBOutlet weak var btnCutBGView: UIView!
     
+    @IBOutlet weak var pdfBtn: UIButton!
     
     var clockView: WriteTimeHoursClockVC!
-
+    
     var questions: [(hour: Int, minute: Int)] = []
     var currentQuestionIndex = 0
     var score = 0
@@ -63,11 +64,11 @@ class WirteTimeQuatersVC: BaseViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-       
+        
         setup()
         applyTheme()
         setupClock()
-       
+        
         generateQuestions()
         loadQuestion()
         
@@ -104,19 +105,19 @@ class WirteTimeQuatersVC: BaseViewController {
         timeLabel.text = userInput
         validateInput()
     }
-
+    
     func appendInput(_ value: String) {
-
+        
         // Submit ke baad input allow nahi hoga
         guard isWaitingForSubmit else { return }
-
+        
         // Max 5 chars: H:MM
         if userInput.count >= 5 { return }
-
+        
         userInput.append(value)
         updateTimeLabel()
     }
-
+    
     func validateInput() {
         // Valid pattern: H:MM or HH:MM
         let pattern = #"^\d{1,2}:\d{1,2}$"#
@@ -124,7 +125,7 @@ class WirteTimeQuatersVC: BaseViewController {
         
         nextBtn.isHidden = !isValid
     }
-
+    
     func clearInput() {
         userInput = ""
         updateTimeLabel()
@@ -139,17 +140,15 @@ class WirteTimeQuatersVC: BaseViewController {
     }
     
     func applyTheme() {
-
+        
         if UserDefaults.standard.bool(forKey: "WhiteTheme") {
-
+            
             HeaderView.backgroundColor = .white
             statusView.backgroundColor = .white
-
+            
             nextBtn.backgroundColor = .white
-            nextBtn.setTitleColor(.black, for: .normal)
-
-            scoreLabelBGView.backgroundColor = .white
-
+          
+            
             let whiteViews = [
                 btn1BGView,
                 btn2BGView,
@@ -163,36 +162,34 @@ class WirteTimeQuatersVC: BaseViewController {
                 btn0BGView,
                 btnColonBGView
             ]
-
+            
             whiteViews.forEach { $0?.backgroundColor = .white }
-
+            
             // Delete button हमेशा Red रहेगा
             btnCutBGView.backgroundColor = .systemRed
-
+            
             let buttons = [
                 btn1, btn2, btn3, btn4, btn5,
                 btn6, btn7, btn8, btn9, btn0,
                 btnColon
             ]
-
+            
             buttons.forEach {
                 $0?.setTitleColor(.black, for: .normal)
             }
-
+            
             btnCut.setTitleColor(.white, for: .normal)
-
+            
         } else {
-
+            
             let color = ColorManager.randomColor()
-
+            
             HeaderView.backgroundColor = color
             statusView.backgroundColor = color
-
+            
             nextBtn.backgroundColor = color
-            nextBtn.setTitleColor(.white, for: .normal)
-
-            scoreLabelBGView.backgroundColor = color
-
+           
+            
             let randomViews = [
                 btn1BGView,
                 btn2BGView,
@@ -206,24 +203,24 @@ class WirteTimeQuatersVC: BaseViewController {
                 btn0BGView,
                 btnColonBGView
             ]
-
+            
             randomViews.forEach {
                 $0?.backgroundColor = ColorManager.randomColor()
             }
-
+            
             // Delete button हमेशा Red रहेगा
             btnCutBGView.backgroundColor = .systemRed
-
+            
             let buttons = [
                 btn1, btn2, btn3, btn4, btn5,
                 btn6, btn7, btn8, btn9, btn0,
                 btnColon
             ]
-
+            
             buttons.forEach {
                 $0?.setTitleColor(.white, for: .normal)
             }
-
+            
             btnCut.setTitleColor(.white, for: .normal)
         }
     }
@@ -232,7 +229,7 @@ class WirteTimeQuatersVC: BaseViewController {
         clockView = WriteTimeHoursClockVC(frame: clockBGView.bounds)
         clockView.translatesAutoresizingMaskIntoConstraints = false
         clockBGView.addSubview(clockView)
-
+        
         NSLayoutConstraint.activate([
             clockView.centerXAnchor.constraint(equalTo: clockBGView.centerXAnchor),
             clockView.centerYAnchor.constraint(equalTo: clockBGView.centerYAnchor),
@@ -241,7 +238,7 @@ class WirteTimeQuatersVC: BaseViewController {
         ])
     }
     
-  
+    
     func generateQuestions() {
         questions.removeAll()
         
@@ -256,23 +253,23 @@ class WirteTimeQuatersVC: BaseViewController {
     
     func loadQuestion() {
         guard currentQuestionIndex < questions.count else { return }
-
+        
         let q = questions[currentQuestionIndex]
-
+        
         questionLabel.text = "\("Question".localiz()) \(currentQuestionIndex + 1)"
         
         timeLabel.text = ""
         rightOrWrongImgView.image = nil
-
+        
         nextBtn.setTitle("Submit".localiz(), for: .normal)
         isWaitingForSubmit = true
-
+        
         // Disable interaction (user cannot move hands)
         clockView.setInteractionEnabled(false)
-
+        
         // Set exact question time
         clockView.setTime(hour: q.hour, minute: q.minute)
-
+        
         clearInput()
         nextBtn.isHidden = true
     }
@@ -282,64 +279,193 @@ class WirteTimeQuatersVC: BaseViewController {
         if let vc = storyboard.instantiateViewController(
             withIdentifier: "WirteTimeQuatersResultVC"
         ) as? WirteTimeQuatersResultVC {
-
+            
             vc.finalScore = score
             vc.clockResults = results
-
+            
             navigationController?.pushViewController(vc, animated: true)
+        }
+    }
+    
+    func createWriteTimeQuartersPDF() -> URL? {
+
+        let pdfURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("WriteTimeQuarters.pdf")
+
+        let pageWidth: CGFloat = 595
+        let pageHeight: CGFloat = 842
+
+        let renderer = UIGraphicsPDFRenderer(
+            bounds: CGRect(x: 0, y: 0, width: pageWidth, height: pageHeight)
+        )
+
+        do {
+
+            try renderer.writePDF(to: pdfURL) { context in
+
+                context.beginPage()
+
+                let title = "Write Time - Quarters"
+
+                let titleAttributes: [NSAttributedString.Key: Any] = [
+                    .font: UIFont.boldSystemFont(ofSize: 30),
+                    .foregroundColor: UIColor.black
+                ]
+
+                let titleSize = title.size(withAttributes: titleAttributes)
+
+                title.draw(
+                    at: CGPoint(
+                        x: (pageWidth - titleSize.width) / 2,
+                        y: 30
+                    ),
+                    withAttributes: titleAttributes
+                )
+
+                let cardWidth: CGFloat = 220
+                let cardHeight: CGFloat = 120
+
+                let startX: CGFloat = 50
+                let spacingX: CGFloat = 30
+
+                var xPos = startX
+                var yPos: CGFloat = 100
+
+                for (index, question) in questions.enumerated() {
+
+                    let time = "\(question.hour):\(String(format: "%02d", question.minute))"
+
+                    let cardRect = CGRect(
+                        x: xPos,
+                        y: yPos,
+                        width: cardWidth,
+                        height: cardHeight
+                    )
+
+                    context.cgContext.saveGState()
+
+                    context.cgContext.setShadow(
+                        offset: CGSize(width: 0, height: 3),
+                        blur: 6,
+                        color: UIColor.black.withAlphaComponent(0.2).cgColor
+                    )
+
+                    let shadowPath = UIBezierPath(
+                        roundedRect: cardRect,
+                        cornerRadius: 18
+                    )
+
+                    UIColor.white.setFill()
+                    shadowPath.fill()
+
+                    context.cgContext.restoreGState()
+
+                    let bgPath = UIBezierPath(
+                        roundedRect: cardRect,
+                        cornerRadius: 18
+                    )
+
+                    ColorManager.randomColor().setFill()
+                    bgPath.fill()
+
+                    UIColor.lightGray.setStroke()
+                    bgPath.lineWidth = 2
+                    bgPath.stroke()
+
+                    let paragraph = NSMutableParagraphStyle()
+                    paragraph.alignment = .center
+
+                    let attrs: [NSAttributedString.Key: Any] = [
+                        .font: UIFont.boldSystemFont(ofSize: 22),
+                        .foregroundColor: UIColor.black,
+                        .paragraphStyle: paragraph
+                    ]
+
+                    let textRect = CGRect(
+                        x: cardRect.minX + 10,
+                        y: cardRect.minY + 35,
+                        width: cardRect.width - 20,
+                        height: 50
+                    )
+
+                    (time as NSString).draw(
+                        in: textRect,
+                        withAttributes: attrs
+                    )
+
+                    if index % 2 == 0 {
+                        xPos += cardWidth + spacingX
+                    } else {
+                        xPos = startX
+                        yPos += cardHeight + 20
+                    }
+
+                    if yPos > pageHeight - 160 {
+                        context.beginPage()
+                        yPos = 100
+                        xPos = startX
+                    }
+                }
+            }
+
+            return pdfURL
+
+        } catch {
+            print(error)
+            return nil
         }
     }
     
     @IBAction func backBtnAction(_ sender: Any) {
         self.navigationController?.popViewController(animated: true)
     }
-
+    
     @IBAction func nextTapBtn(_ sender: UIButton) {
-
+        
         // Submit state
         if isWaitingForSubmit {
-
+            
             let q = questions[currentQuestionIndex]
-
+            
             let correctTime = "\(q.hour):\(String(format: "%02d", q.minute))"
             let correct = (userInput == correctTime)
-
+            
             if correct {
                 rightOrWrongImgView.image = UIImage(named: "check mark")
                 score += 1
             } else {
                 rightOrWrongImgView.image = UIImage(named: "close")
             }
-
+            
             scoreLabel.text = "\("Score".localiz()): \(score) / \(currentQuestionIndex + 1)"
-
+            
             let result = WriteTimeHoursClockResult(
                 correctTime: correctTime,
                 userTime: userInput,
                 isCorrect: correct
             )
             results.append(result)
-
+            
             currentQuestionIndex += 1
             isWaitingForSubmit = false
             nextBtn.setTitle("Next".localiz(), for: .normal)
-
+            
             // Disable interaction after submit
             clockView.setInteractionEnabled(false)
-
+            
             if currentQuestionIndex >= questions.count {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
                     self.showResultScreen()
                 }
             }
-
+            
             return
         }
-
+        
         // Next state → load next question
         loadQuestion()
     }
-
+    
     @IBAction func btnTap1(_ sender: UIButton) {
         appendInput("1")
     }
@@ -371,25 +497,40 @@ class WirteTimeQuatersVC: BaseViewController {
         appendInput("0")
     }
     @IBAction func btnTapColon(_ sender: UIButton) {
-
+        
         guard isWaitingForSubmit else { return }
-
+        
         if !userInput.contains(":") &&
             userInput.count > 0 &&
             userInput.count <= 2 {
-
+            
             appendInput(":")
         }
     }
     
     @IBAction func btnTapCut(_ sender: UIButton) {
-
+        
         guard isWaitingForSubmit else { return }
         guard !userInput.isEmpty else { return }
-
+        
         userInput.removeLast()
         updateTimeLabel()
     }
     
+    @IBAction func pdfTapBtn(_ sender: UIButton) {
+
+        guard let pdfURL = createWriteTimeQuartersPDF() else { return }
+
+        let activityVC = UIActivityViewController(
+            activityItems: [pdfURL],
+            applicationActivities: nil
+        )
+
+        if let popover = activityVC.popoverPresentationController {
+            popover.sourceView = sender
+        }
+
+        present(activityVC, animated: true)
+    }
     
 }

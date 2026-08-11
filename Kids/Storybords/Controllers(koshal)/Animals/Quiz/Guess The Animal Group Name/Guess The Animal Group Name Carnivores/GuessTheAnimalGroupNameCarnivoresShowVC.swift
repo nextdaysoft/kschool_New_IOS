@@ -86,18 +86,12 @@ class GuessTheAnimalGroupNameCarnivoresShowVC: BaseViewController, AVSpeechSynth
             $0?.textAlignment = .center
             $0?.font = UIFont.systemFont(ofSize: 18)
         }
-        
-        nextBtn.layer.cornerRadius = 10
-        nextBtn.backgroundColor = ColorManager.randomColor()
-        nextBtn.layer.borderColor = UIColor.black.cgColor
-  
-        
+       
         view1.layer.cornerRadius = 10
         view2.layer.cornerRadius = 10
         view3.layer.cornerRadius = 10
         view4.layer.cornerRadius = 10
         
-        scoreBGVIew.layer.cornerRadius = 10
         questionBGView.layer.cornerRadius = 10
         
         questionLabel.numberOfLines = 0
@@ -112,6 +106,9 @@ class GuessTheAnimalGroupNameCarnivoresShowVC: BaseViewController, AVSpeechSynth
         backBtn.tintColor = #colorLiteral(red: 0.1718951762, green: 0.212508589, blue: 0.3281655014, alpha: 1)
         HeaderView.backgroundColor = color
         statusView.backgroundColor = color
+        nextBtn.layer.cornerRadius = 6
+        nextBtn.backgroundColor = color
+        scoreBGVIew.layer.cornerRadius = 6
     }
 
     func speak(text: String) {

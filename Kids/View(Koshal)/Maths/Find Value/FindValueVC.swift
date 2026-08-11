@@ -106,7 +106,7 @@ class FindValueVC: BaseViewController {
         activeField = 0   // 👈 default tens selected
         updateFieldColors()
         
-        scoreLblBGView.layer.cornerRadius = 10
+        scoreLblBGView.layer.cornerRadius = 6
         imgBGView.layer.cornerRadius = 10
         showimgBGView.layer.cornerRadius = 10
         
@@ -191,16 +191,13 @@ class FindValueVC: BaseViewController {
             HeaderView.backgroundColor = .white
             statusView.backgroundColor = .white
 
-            scoreLblBGView.backgroundColor = .white
             imgBGView.backgroundColor = .white
             showimgBGView.backgroundColor = .white
 
             nextAndSubimtTapbtn.backgroundColor = .white
-            nextAndSubimtTapbtn.setTitleColor(.black, for: .normal)
 
             buttons.forEach {
                 $0?.backgroundColor = .white
-                $0?.setTitleColor(.black, for: .normal)
             }
 
         } else {
@@ -210,16 +207,13 @@ class FindValueVC: BaseViewController {
             HeaderView.backgroundColor = color
             statusView.backgroundColor = color
 
-            scoreLblBGView.backgroundColor = color
             imgBGView.backgroundColor = .white
             showimgBGView.backgroundColor = .white
 
             nextAndSubimtTapbtn.backgroundColor = color
-            nextAndSubimtTapbtn.setTitleColor(.white, for: .normal)
 
             buttons.forEach {
                 $0?.backgroundColor = ColorManager.randomColor()
-                $0?.setTitleColor(.white, for: .normal)
             }
         }
     }
@@ -427,7 +421,147 @@ class FindValueVC: BaseViewController {
         }
     }
     
+    func createPDF() -> URL? {
+
+        let pdfURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("FindValue.pdf")
+
+        view.layoutIfNeeded()
+
+        // ✅ Sirf worksheet views capture honge
+        let views: [UIView] = [
+            showimgBGView,
+            imgBGView,
+            tensLblBGView,
+            oneLblBGView,
+            totalLblBGView
+        ]
+
+        guard let first = views.first else { return nil }
+
+        var captureRect = first.superview!.convert(first.frame, to: view)
+
+        for v in views.dropFirst() {
+            let rect = v.superview!.convert(v.frame, to: view)
+            captureRect = captureRect.union(rect)
+        }
+
+        captureRect = captureRect.insetBy(dx: -10, dy: -10)
+
+        let renderer = UIGraphicsImageRenderer(size: captureRect.size)
+
+        let image = renderer.image { _ in
+
+            // ❌ Hide unwanted views
+            let hiddenViews: [UIView] = [
+                HeaderView,
+                statusView,
+                backBtn,
+                pdfBtn,
+                scoreLblBGView,
+                nextAndSubimtTapbtn,
+                btn0,
+                btn1,
+                btn2,
+                btn3,
+                btn4,
+                btn5,
+                btn6,
+                btn7,
+                btn8,
+                btn9,
+                btnX,
+                questionLbl
+            ]
+
+            hiddenViews.forEach { $0.isHidden = true }
+
+            view.drawHierarchy(
+                in: CGRect(
+                    x: -captureRect.origin.x,
+                    y: -captureRect.origin.y,
+                    width: view.bounds.width,
+                    height: view.bounds.height
+                ),
+                afterScreenUpdates: true
+            )
+
+            // ✅ Restore
+            hiddenViews.forEach { $0.isHidden = false }
+        }
+
+        let pageWidth: CGFloat = 595
+        let pageHeight: CGFloat = 842
+
+        let pdfRenderer = UIGraphicsPDFRenderer(
+            bounds: CGRect(x: 0, y: 0, width: pageWidth, height: pageHeight)
+        )
+
+        do {
+
+            try pdfRenderer.writePDF(to: pdfURL) { context in
+
+                context.beginPage()
+
+                let title = "Find the total value based on the below info."
+
+                title.draw(
+                    in: CGRect(
+                        x: 20,
+                        y: 20,
+                        width: pageWidth - 40,
+                        height: 35
+                    ),
+                    withAttributes: [
+                        .font: UIFont.boldSystemFont(ofSize: 24),
+                        .foregroundColor: UIColor.black
+                    ]
+                )
+
+                let maxWidth = pageWidth - 40
+                let maxHeight = pageHeight - 90
+
+                let scale = min(
+                    maxWidth / image.size.width,
+                    maxHeight / image.size.height
+                )
+
+                let drawWidth = image.size.width * scale
+                let drawHeight = image.size.height * scale
+
+                image.draw(
+                    in: CGRect(
+                        x: (pageWidth - drawWidth) / 2,
+                        y: 70,
+                        width: drawWidth,
+                        height: drawHeight
+                    )
+                )
+            }
+
+            return pdfURL
+
+        } catch {
+
+            print(error)
+            return nil
+        }
+    }
+    
     @IBAction func pdfTapBtn(_ sender: UIButton) {
+
+        guard let url = createPDF() else { return }
+
+        let activityVC = UIActivityViewController(
+            activityItems: [url],
+            applicationActivities: nil
+        )
+
+        if let pop = activityVC.popoverPresentationController {
+            pop.sourceView = sender
+        }
+
+        present(activityVC, animated: true)
     }
 
     @IBAction func btn1(_ sender: UIButton) { appendNumber("1") }

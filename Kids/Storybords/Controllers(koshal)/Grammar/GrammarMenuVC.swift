@@ -215,10 +215,7 @@ class GrammarMenuVC: BaseViewController {
 
             HeaderView.backgroundColor = .white
             statusView.backgroundColor = .white
-
-            learningView.backgroundColor = .white
-            quizView.backgroundColor = .white
-
+            
             viewBG1.backgroundColor = .white
             viewBG2.backgroundColor = .white
             viewBG3.backgroundColor = .white
@@ -236,9 +233,6 @@ class GrammarMenuVC: BaseViewController {
 
             HeaderView.backgroundColor = color
             statusView.backgroundColor = color
-
-            learningView.backgroundColor = ColorManager.randomColor()
-            quizView.backgroundColor = ColorManager.randomColor()
 
             viewBG1.backgroundColor = ColorManager.randomColor()
             viewBG2.backgroundColor = ColorManager.randomColor()
@@ -339,20 +333,24 @@ class GrammarMenuVC: BaseViewController {
 
             } else {
 
-                image.image =
-                subscribed ? nil : lockImage
-
+                image.image = subscribed ? nil : lockImage
                 label.text = ""
 
-                if UserDefaults.standard.bool(forKey: "WhiteTheme") {
+                if subscribed {
 
-                    bg.backgroundColor = completed ? .white : .systemGray4
+                    if UserDefaults.standard.bool(forKey: "WhiteTheme") {
+                        bg.backgroundColor = .white
+                    } else {
+                        bg.backgroundColor = ColorManager.randomColor()
+                    }
 
                 } else {
 
-                    bg.backgroundColor = completed
-                        ? ColorManager.randomColor()
-                        : .systemGray4
+                    if UserDefaults.standard.bool(forKey: "WhiteTheme") {
+                        bg.backgroundColor = .systemGray4
+                    } else {
+                        bg.backgroundColor = .systemGray4
+                    }
                 }
             }
         }

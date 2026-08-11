@@ -127,7 +127,6 @@ class IdentifyLetterShowVC: BaseViewController, AVSpeechSynthesizerDelegate {
             statusView.backgroundColor = .white
 
             nextBtn.backgroundColor = .white
-            nextBtn.setTitleColor(.black, for: .normal)
 
             scoreBGVIew.backgroundColor = .white
 
@@ -139,7 +138,6 @@ class IdentifyLetterShowVC: BaseViewController, AVSpeechSynthesizerDelegate {
             statusView.backgroundColor = color
 
             nextBtn.backgroundColor = color
-            nextBtn.setTitleColor(.white, for: .normal)
 
             scoreBGVIew.backgroundColor = color
         }

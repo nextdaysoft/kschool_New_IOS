@@ -21,6 +21,8 @@ class LearnCapacityUnitConversionShowVC: BaseViewController,AVSpeechSynthesizerD
     
     @IBOutlet weak var allViewDrop: UIView!
     
+    @IBOutlet weak var pdfBtn: UIButton!
+    
     let days: [String] = [
         "1 litre = 1000 millilitre",
         "1 kilolitre = 1000 litre",
@@ -654,6 +656,144 @@ class LearnCapacityUnitConversionShowVC: BaseViewController,AVSpeechSynthesizerD
         imgBGView.layer.borderColor = randomColor.cgColor
     }
     
+    func createCapacityUnitConversionPDF() -> URL? {
+
+        let pdfURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("CapacityUnitConversion.pdf")
+
+        let pageWidth: CGFloat = 595
+        let pageHeight: CGFloat = 842
+
+        let renderer = UIGraphicsPDFRenderer(
+            bounds: CGRect(x: 0, y: 0, width: pageWidth, height: pageHeight)
+        )
+
+        do {
+
+            try renderer.writePDF(to: pdfURL) { context in
+
+                context.beginPage()
+
+                // MARK: Title
+                let title = "Capacity Unit Conversion"
+
+                let titleAttributes: [NSAttributedString.Key: Any] = [
+                    .font: UIFont.boldSystemFont(ofSize: 30),
+                    .foregroundColor: UIColor.black
+                ]
+
+                let titleSize = title.size(withAttributes: titleAttributes)
+
+                title.draw(
+                    at: CGPoint(
+                        x: (pageWidth - titleSize.width) / 2,
+                        y: 30
+                    ),
+                    withAttributes: titleAttributes
+                )
+
+                let cardWidth: CGFloat = 220
+                let cardHeight: CGFloat = 120
+
+                let startX: CGFloat = 50
+                let spacingX: CGFloat = 30
+
+                var xPos = startX
+                var yPos: CGFloat = 100
+
+                for (index, value) in days.enumerated() {
+
+                    let cardRect = CGRect(
+                        x: xPos,
+                        y: yPos,
+                        width: cardWidth,
+                        height: cardHeight
+                    )
+
+                    // Shadow
+                    context.cgContext.saveGState()
+                    context.cgContext.setShadow(
+                        offset: CGSize(width: 0, height: 3),
+                        blur: 6,
+                        color: UIColor.black.withAlphaComponent(0.2).cgColor
+                    )
+
+                    let cardPath = UIBezierPath(
+                        roundedRect: cardRect,
+                        cornerRadius: 18
+                    )
+
+                    UIColor.white.setFill()
+                    cardPath.fill()
+
+                    context.cgContext.restoreGState()
+
+                    // Border
+                    UIColor.lightGray.setStroke()
+                    cardPath.lineWidth = 2
+                    cardPath.stroke()
+
+                    // Rounded Color Bar
+                    let barRect = CGRect(
+                        x: cardRect.minX,
+                        y: cardRect.minY,
+                        width: cardRect.width,
+                        height: cardRect.height
+                    )
+
+                    let barPath = UIBezierPath(
+                        roundedRect: barRect,
+                        cornerRadius: 18
+                    )
+
+                    ColorManager.randomColor().setFill()
+                    barPath.fill()
+
+                    // Text
+                    let paragraph = NSMutableParagraphStyle()
+                    paragraph.alignment = .center
+                    paragraph.lineBreakMode = .byWordWrapping
+
+                    let attrs: [NSAttributedString.Key: Any] = [
+                        .font: UIFont.boldSystemFont(ofSize: 18),
+                        .foregroundColor: UIColor.black,
+                        .paragraphStyle: paragraph
+                    ]
+
+                    let textRect = CGRect(
+                        x: cardRect.minX + 12,
+                        y: cardRect.minY + 20,
+                        width: cardRect.width - 24,
+                        height: cardRect.height - 40
+                    )
+
+                    (value as NSString).draw(
+                        in: textRect,
+                        withAttributes: attrs
+                    )
+
+                    if index % 2 == 0 {
+                        xPos += cardWidth + spacingX
+                    } else {
+                        xPos = startX
+                        yPos += cardHeight + 20
+                    }
+
+                    if yPos > pageHeight - 160 {
+                        context.beginPage()
+                        yPos = 100
+                        xPos = startX
+                    }
+                }
+            }
+
+            return pdfURL
+
+        } catch {
+            print(error)
+            return nil
+        }
+    }
     
     @IBAction func repeatTapBtn(_ sender: UIButton) {
         speak(text: days[currentIndex])
@@ -663,5 +803,20 @@ class LearnCapacityUnitConversionShowVC: BaseViewController,AVSpeechSynthesizerD
         self.navigationController?.popViewController(animated: true)
     }
     
+    @IBAction func pdfTapBtn(_ sender: UIButton) {
+
+        guard let pdfURL = createCapacityUnitConversionPDF() else { return }
+
+        let activityVC = UIActivityViewController(
+            activityItems: [pdfURL],
+            applicationActivities: nil
+        )
+
+        if let popover = activityVC.popoverPresentationController {
+            popover.sourceView = sender
+        }
+
+        present(activityVC, animated: true)
+    }
  
 }

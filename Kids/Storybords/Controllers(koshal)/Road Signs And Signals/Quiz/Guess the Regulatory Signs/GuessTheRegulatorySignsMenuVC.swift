@@ -243,7 +243,7 @@ class GuessTheRegulatorySignsMenuVC: BaseViewController {
     
     func updateResetVisibility() {
 
-        let levelData = UserDefaults.standard.dictionary(forKey: "guessTheRegulatorySignsLevelLevelData") as? [String: Int]
+        let levelData = UserDefaults.standard.dictionary(forKey: "guessTheRegulatorySignsLevelData") as? [String: Int]
 
         let isAnyCompleted = !(levelData?.isEmpty ?? true)
 
@@ -261,12 +261,21 @@ class GuessTheRegulatorySignsMenuVC: BaseViewController {
     
     func updateLevelUI(level: Int, imageView: UIImageView, label: UILabel) {
 
-        let levelData = UserDefaults.standard.dictionary(forKey: "guessTheRegulatorySignsLevelLevelData") as? [String: Int] ?? [:]
+        let isCompleted = UserDefaults.standard.bool(
+            forKey: "guessTheRegulatorySignsLevel\(level)Completed"
+        )
 
-        if let percentage = levelData["\(level)"] {
+        let percentage = UserDefaults.standard.integer(
+            forKey: "guessTheRegulatorySignsLevel\(level)Percentage"
+        )
+
+        if isCompleted {
+
             imageView.image = UIImage(named: "done")
             label.text = "\(percentage)%"
+
         } else {
+
             imageView.image = nil
             label.text = ""
         }
@@ -332,7 +341,24 @@ class GuessTheRegulatorySignsMenuVC: BaseViewController {
     }
     
     @IBAction func restTapBtn(_ sender: UIButton) {
-        UserDefaults.standard.removeObject(forKey: "guessTheRegulatorySignsLevelLevelData")
+
+        UserDefaults.standard.removeObject(
+            forKey: "guessTheRegulatorySignsLevelData"
+        )
+
+        for i in 1...3 {
+
+            UserDefaults.standard.removeObject(
+                forKey: "guessTheRegulatorySignsLevel\(i)Completed"
+            )
+
+            UserDefaults.standard.removeObject(
+                forKey: "guessTheRegulatorySignsLevel\(i)Percentage"
+            )
+        }
+
+        UserDefaults.standard.synchronize()
+
         updateLevelImages()
         updateResetVisibility()
     }

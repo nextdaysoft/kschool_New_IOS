@@ -105,8 +105,6 @@ class PlanentOrderMatchVC: BaseViewController {
         super.viewDidLoad()
         setup()
         submitAndNextTapBtn.isHidden = true
-        submitAndNextTapBtn.layer.cornerRadius = 10
-        
         
         firstNLabelBGView1.layer.cornerRadius = 10
         firstNLabelBGView1.backgroundColor = ColorManager.randomColor()
@@ -189,12 +187,6 @@ class PlanentOrderMatchVC: BaseViewController {
         lastNLabelBGView8.backgroundColor = ColorManager.randomColor()
         lastNLabelBGView8.layer.borderColor = UIColor.black.cgColor
 
-        
-        submitAndNextTapBtn.layer.cornerRadius = 10
-        submitAndNextTapBtn.backgroundColor = ColorManager.randomColor()
-        submitAndNextTapBtn.layer.borderColor = UIColor.black.cgColor
-    
-        
         firstLabels = [
             firstNameLabel1,
             firstNameLabel2,
@@ -270,6 +262,8 @@ class PlanentOrderMatchVC: BaseViewController {
         backBtn.tintColor = #colorLiteral(red: 0.1718951762, green: 0.212508589, blue: 0.3281655014, alpha: 1)
         HeaderView.backgroundColor = color
         statusView.backgroundColor = color
+        submitAndNextTapBtn.layer.cornerRadius = 6
+        submitAndNextTapBtn.backgroundColor = color
     }
 
     func adjustLastWordWidths() {

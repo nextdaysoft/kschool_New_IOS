@@ -124,15 +124,10 @@ class BodmasShowVC: BaseViewController {
 
             HeaderView.backgroundColor = .white
             statusView.backgroundColor = .white
-
-            scoreLblBGView.backgroundColor = .white
-
             nextAndSubmitBtn.backgroundColor = .white
-            nextAndSubmitBtn.setTitleColor(.black, for: .normal)
 
             keypadButtons.forEach {
                 $0?.backgroundColor = .white
-                $0?.setTitleColor(.black, for: .normal)
             }
 
         } else {
@@ -141,15 +136,10 @@ class BodmasShowVC: BaseViewController {
 
             HeaderView.backgroundColor = color
             statusView.backgroundColor = color
-
-            scoreLblBGView.backgroundColor = color
-
             nextAndSubmitBtn.backgroundColor = color
-            nextAndSubmitBtn.setTitleColor(.white, for: .normal)
 
             keypadButtons.forEach {
                 $0?.backgroundColor = ColorManager.randomColor()
-                $0?.setTitleColor(.white, for: .normal)
             }
         }
     }
@@ -716,7 +706,156 @@ class BodmasShowVC: BaseViewController {
         resultNu.textColor = .black
     }
     
+    func createPDF() -> URL? {
+
+        let pdfURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("BODMAS_Level_\(levelNumber).pdf")
+
+        let pageWidth: CGFloat = 595
+        let pageHeight: CGFloat = 842
+
+        let renderer = UIGraphicsPDFRenderer(
+            bounds: CGRect(x: 0, y: 0, width: pageWidth, height: pageHeight)
+        )
+
+        do {
+
+            try renderer.writePDF(to: pdfURL) { context in
+
+                context.beginPage()
+
+                let title = "BODMAS - Level \(levelNumber)"
+
+                (title as NSString).draw(
+                    in: CGRect(x: 20, y: 20, width: pageWidth - 40, height: 35),
+                    withAttributes: [
+                        .font: UIFont.boldSystemFont(ofSize: 24),
+                        .foregroundColor: UIColor.black
+                    ]
+                )
+
+                var y: CGFloat = 90
+
+                for _ in 0..<10 {
+
+                    let question = generatePDFQuestion()
+
+                    (question as NSString).draw(
+                        at: CGPoint(x: 70, y: y),
+                        withAttributes: [
+                            .font: UIFont.systemFont(ofSize: 28)
+                        ]
+                    )
+
+                    y += 60
+
+                    if y > 760 {
+                        context.beginPage()
+                        y = 60
+                    }
+                }
+            }
+
+            return pdfURL
+
+        } catch {
+
+            print(error)
+            return nil
+        }
+    }
+    
+    func generatePDFQuestion() -> String {
+
+        let num1 = Int.random(in: 1...9)
+        let num2 = Int.random(in: 1...9)
+        let num3 = Int.random(in: 1...9)
+
+        switch levelNumber {
+
+        case 1:
+            return "\(num1) + \(num2) - \(num3) = ______"
+
+        case 2:
+
+            if Bool.random() {
+                return "\(num1) × \(num2) + \(num3) = ______"
+            } else {
+                return "\(num1) + \(num2) × \(num3) = ______"
+            }
+
+        case 3:
+
+            let divisor = Int.random(in: 1...5)
+            let divisible = divisor * Int.random(in: 1...5)
+
+            if Bool.random() {
+                return "\(divisible) ÷ \(divisor) + \(num3) = ______"
+            } else {
+                return "\(num1) + \(divisible) ÷ \(divisor) = ______"
+            }
+
+        case 4:
+
+            let divisor = Int.random(in: 1...5)
+            let answer = Int.random(in: 1...10)
+            let multiple = answer * divisor
+
+            return "\(multiple) ÷ \(divisor) × \(num3) = ______"
+
+        case 5:
+            return "(\(num1) + \(num2)) - \(num3) = ______"
+
+        case 6:
+            return "(\(num1) × \(num2)) + \(num3) = ______"
+
+        case 7:
+
+            let divisor = Int.random(in: 1...5)
+            let divisible = divisor * Int.random(in: 1...5)
+
+            return "\(divisible) ÷ (\(num1) × \(divisor)) = ______"
+
+        case 8:
+
+            let divisor = Int.random(in: 1...5)
+            let divisible = divisor * Int.random(in: 1...5)
+
+            return "\(num1) × \(num2) + \(divisible) ÷ \(divisor) = ______"
+
+        case 9:
+
+            let base = Int.random(in: 2...9)
+            let power = Int.random(in: 2...3)
+
+            return "\(base)^\(power) = ______"
+
+        case 10:
+
+            let divisor = Int.random(in: 1...5)
+            let divisible = divisor * Int.random(in: 1...5)
+
+            return "\(num1) × (\(divisible) ÷ \(divisor)) + \(num2) = ______"
+
+        default:
+            return "\(num1) + \(num2) = ______"
+        }
+    }
+    
     @IBAction func pdfTapBtn(_ sender: UIButton) {
+
+        guard let pdfURL = createPDF() else { return }
+
+        let activityVC = UIActivityViewController(
+            activityItems: [pdfURL],
+            applicationActivities: nil
+        )
+
+        if let popover = activityVC.popoverPresentationController {
+            popover.sourceView = sender
+        }
+
+        present(activityVC, animated: true)
     }
 
     @IBAction func btn1(_ sender: UIButton) { handleNumberInput("1") }

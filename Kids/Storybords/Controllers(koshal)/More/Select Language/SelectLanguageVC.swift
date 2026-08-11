@@ -8,8 +8,7 @@
 import UIKit
 import LanguageManager_iOS
 
-class SelectLanguageVC: BaseViewController {
-    
+class SelectLanguageVC: BaseViewController, UITextFieldDelegate {
     
     @IBOutlet weak var searchBGView: UIView!
     @IBOutlet weak var searchTextField: UITextField!
@@ -89,6 +88,9 @@ class SelectLanguageVC: BaseViewController {
     @IBOutlet weak var doneBtn: UIButton!
     
     @IBOutlet weak var doneBtnBgView: UIView!
+    @IBOutlet weak var leftBtnWidth: NSLayoutConstraint!
+    @IBOutlet weak var leadingConstraint: NSLayoutConstraint!
+    
     
     var bgViews: [UIView] = []
     var imageViews: [UIImageView] = []
@@ -96,8 +98,15 @@ class SelectLanguageVC: BaseViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         setup()
         updateText()
+        
+        searchTextField.delegate = self
+        searchTextField.addTarget(self,
+                                  action: #selector(searchTextChanged),
+                                  for: .editingChanged)
+        
         NotificationCenter.default.addObserver(self, selector: #selector(updateText), name: NSNotification.Name("LanguageChanged"), object: nil)
         searchBGView.layer.cornerRadius = 10
         searchBGView.layer.borderColor = UIColor.black.cgColor
@@ -162,9 +171,32 @@ class SelectLanguageVC: BaseViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+
         navigationController?.setNavigationBarHidden(true, animated: false)
-        doneBtnBgView.isHidden = isFromMoreVC
+
+        if isFromMoreVC {
+            doneBtnBgView.isHidden = true
+            leftBtnWidth.constant = 50
+            leadingConstraint.constant = 0      // ya jitna normal spacing chahiye
+        } else {
+            doneBtnBgView.isHidden = false
+            leftBtnWidth.constant = 0
+            leadingConstraint.constant = 10     // ✅ leftBtnWidth = 0 hone par 10 pt space
+        }
+
+        view.layoutIfNeeded()
     }
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()   // Keyboard hide
+        return true
+    }
+    
+    
+    func hideKeyboard() {
+        view.endEditing(true)
+    }
+    
     
     func selectItem(at index: Int) {
         
@@ -244,11 +276,17 @@ class SelectLanguageVC: BaseViewController {
     }
     
     @IBAction func level2TapBtn(_ sender: UIButton) {
+        hideKeyboard()
         selectItem(at: 1)
        
     }
-    @IBAction func level3TapBtn(_ sender: UIButton) { selectItem(at: 2) }
-    @IBAction func level4TapBtn(_ sender: UIButton) { selectItem(at: 3)
+    @IBAction func level3TapBtn(_ sender: UIButton) {
+        hideKeyboard()
+        selectItem(at: 2)
+    }
+    @IBAction func level4TapBtn(_ sender: UIButton) {
+        hideKeyboard()
+        selectItem(at: 3)
         
 //        UserDefaults.standard.set(1, forKey: "selectedImageTag") // saveSelectedImage(tag: 3)
 //        
@@ -256,44 +294,129 @@ class SelectLanguageVC: BaseViewController {
 //        changeLanguageAndSaveToUserDefaults(langSet: "zhHans")
     }
     
-    @IBAction func level5TapBtn(_ sender: UIButton) { selectItem(at: 4) }
-    @IBAction func level6TapBtn(_ sender: UIButton) { selectItem(at: 5) }
-    
-    @IBAction func level7TapBtn(_ sender: UIButton) {
-        selectItem(at: 6)
-        LanguageManager.shared.setLanguage(language: .en)
-        changeLanguageAndSaveToUserDefaults()
+    @IBAction func level5TapBtn(_ sender: UIButton) {
+        hideKeyboard()
+        selectItem(at: 4)
+    }
+    @IBAction func level6TapBtn(_ sender: UIButton) {
+        hideKeyboard()
+        selectItem(at: 5)
     }
     
-    @IBAction func level8TapBtn(_ sender: UIButton) { selectItem(at: 7) }
-    @IBAction func level9TapBtn(_ sender: UIButton) { selectItem(at: 8) }
-    @IBAction func level10TapBtn(_ sender: UIButton) { selectItem(at: 9) }
+    @IBAction func level7TapBtn(_ sender: UIButton) {
+        hideKeyboard()
+        selectItem(at: 6)
+//        LanguageManager.shared.setLanguage(language: .en)
+//        changeLanguageAndSaveToUserDefaults()
+    }
+    
+    @IBAction func level8TapBtn(_ sender: UIButton) {
+        hideKeyboard()
+        selectItem(at: 7)
+    }
+    @IBAction func level9TapBtn(_ sender: UIButton) {
+        hideKeyboard()
+        selectItem(at: 8)
+    }
+    @IBAction func level10TapBtn(_ sender: UIButton) {
+        hideKeyboard()
+        selectItem(at: 9)
+    }
 
-    @IBAction func level11TapBtn(_ sender: UIButton) { selectItem(at: 10) }
-    @IBAction func level12TapBtn(_ sender: UIButton) { selectItem(at: 11) }
-    @IBAction func level13TapBtn(_ sender: UIButton) { selectItem(at: 12) }
-    @IBAction func level14TapBtn(_ sender: UIButton) { selectItem(at: 13) }
-    @IBAction func level15TapBtn(_ sender: UIButton) { selectItem(at: 14) }
-    @IBAction func level16TapBtn(_ sender: UIButton) { selectItem(at: 15) }
-    @IBAction func level17TapBtn(_ sender: UIButton) { selectItem(at: 16) }
-    @IBAction func level18TapBtn(_ sender: UIButton) { selectItem(at: 17) }
-    @IBAction func level19TapBtn(_ sender: UIButton) { selectItem(at: 18) }
-    @IBAction func level20TapBtn(_ sender: UIButton) { selectItem(at: 19) }
+    @IBAction func level11TapBtn(_ sender: UIButton) {
+        hideKeyboard()
+        selectItem(at: 10)
+    }
+    @IBAction func level12TapBtn(_ sender: UIButton) {
+        hideKeyboard()
+        selectItem(at: 11)
+    }
+    @IBAction func level13TapBtn(_ sender: UIButton) {
+        hideKeyboard()
+        selectItem(at: 12)
+    }
+    @IBAction func level14TapBtn(_ sender: UIButton) {
+        hideKeyboard()
+        selectItem(at: 13)
+    }
+    @IBAction func level15TapBtn(_ sender: UIButton) {
+        hideKeyboard()
+        selectItem(at: 14)
+    }
+    @IBAction func level16TapBtn(_ sender: UIButton) {
+        hideKeyboard()
+        selectItem(at: 15)
+    }
+    @IBAction func level17TapBtn(_ sender: UIButton) {
+        hideKeyboard()
+        selectItem(at: 16)
+    }
+    @IBAction func level18TapBtn(_ sender: UIButton) {
+        hideKeyboard()
+        selectItem(at: 17)
+    }
+    @IBAction func level19TapBtn(_ sender: UIButton) {
+        hideKeyboard()
+        selectItem(at: 18)
+    }
+    @IBAction func level20TapBtn(_ sender: UIButton) {
+        hideKeyboard()
+        selectItem(at: 19)
+    }
 
-    @IBAction func level21TapBtn(_ sender: UIButton) { selectItem(at: 20) }
-    @IBAction func level22TapBtn(_ sender: UIButton) { selectItem(at: 21) }
-    @IBAction func level23TapBtn(_ sender: UIButton) { selectItem(at: 22) }
-    @IBAction func level24TapBtn(_ sender: UIButton) { selectItem(at: 23) }
-    @IBAction func level25TapBtn(_ sender: UIButton) { selectItem(at: 24) }
-    @IBAction func level26TapBtn(_ sender: UIButton) { selectItem(at: 25) }
-    @IBAction func level27TapBtn(_ sender: UIButton) { selectItem(at: 26) }
-    @IBAction func level28TapBtn(_ sender: UIButton) { selectItem(at: 27) }
-    @IBAction func level29TapBtn(_ sender: UIButton) { selectItem(at: 28) }
-    @IBAction func level30TapBtn(_ sender: UIButton) { selectItem(at: 29) }
+    @IBAction func level21TapBtn(_ sender: UIButton) {
+        hideKeyboard()
+        selectItem(at: 20)
+    }
+    @IBAction func level22TapBtn(_ sender: UIButton) {
+        hideKeyboard()
+        selectItem(at: 21)
+    }
+    @IBAction func level23TapBtn(_ sender: UIButton) {
+        hideKeyboard()
+        selectItem(at: 22)
+    }
+    @IBAction func level24TapBtn(_ sender: UIButton) {
+        hideKeyboard()
+        selectItem(at: 23)
+    }
+    @IBAction func level25TapBtn(_ sender: UIButton) {
+        hideKeyboard()
+        selectItem(at: 24)
+    }
+    @IBAction func level26TapBtn(_ sender: UIButton) {
+        hideKeyboard()
+        selectItem(at: 25)
+    }
+    @IBAction func level27TapBtn(_ sender: UIButton) {
+        hideKeyboard()
+        selectItem(at: 26)
+    }
+    @IBAction func level28TapBtn(_ sender: UIButton) {
+        hideKeyboard()
+        selectItem(at: 27)
+    }
+    @IBAction func level29TapBtn(_ sender: UIButton) {
+        hideKeyboard()
+        selectItem(at: 28)
+    }
+    @IBAction func level30TapBtn(_ sender: UIButton) {
+        hideKeyboard()
+        selectItem(at: 29)
+    }
 
-    @IBAction func level31TapBtn(_ sender: UIButton) { selectItem(at: 30) }
-    @IBAction func level32TapBtn(_ sender: UIButton) { selectItem(at: 31) }
-    @IBAction func level33TapBtn(_ sender: UIButton) { selectItem(at: 32) }
+    @IBAction func level31TapBtn(_ sender: UIButton) {
+        hideKeyboard()
+        selectItem(at: 30)
+    }
+    @IBAction func level32TapBtn(_ sender: UIButton) {
+        hideKeyboard()
+        selectItem(at: 31)
+    }
+    @IBAction func level33TapBtn(_ sender: UIButton) {
+        hideKeyboard()
+        selectItem(at: 32)
+    }
 
     
     
@@ -304,4 +427,61 @@ class SelectLanguageVC: BaseViewController {
         let vc = storyboard?.instantiateViewController(withIdentifier: "OnboardingViewController") as! OnboardingViewController
         navigationController?.pushViewController(vc, animated: true)
     }
+    
+    @objc func searchTextChanged() {
+
+        let text = searchTextField.text?.lowercased() ?? ""
+
+        for (index, view) in bgViews.enumerated() {
+
+            if text.isEmpty {
+                view.isHidden = false
+            } else {
+                view.isHidden = !languageNames[index].lowercased().contains(text)
+            }
+        }
+    }
+  
 }
+
+var languageNames = [
+    "Arabic",
+    "Assamese",
+    "Bengali",
+    "Chinese",
+    "Danish",
+    "Dutch",
+    "English",
+    "Finnish",
+    "French",
+    "German",
+    "Greek",
+    "Gujarati",
+    "Hebrew",
+    "Hindi",
+    "Hungarian",
+    "Indonesian",
+    "Italian",
+    "Japanese",
+    "Kannada",
+    "Korean",
+    "Malay",
+    "Malayalam",
+    "Marathi",
+    "Nepali",
+    "Norwegian",
+    "Odia",
+    "Persian",
+    "Polish",
+    "Portuguese",
+    "Punjabi",
+    "Romanian",
+    "Russian",
+    "Spanish",
+    "Swedish",
+    "Tamil",
+    "Telugu",
+    "Thai",
+    "Turkish",
+    "Urdu"
+]

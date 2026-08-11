@@ -70,12 +70,6 @@ class IdentifyActionVerbResultVC: BaseViewController {
 
             bgViews[i]?.layer.cornerRadius = 15
             bgViews[i]?.layer.borderWidth = 3
-
-            if UserDefaults.standard.bool(forKey: "WhiteTheme") {
-                bgViews[i]?.backgroundColor = .white
-            } else {
-                bgViews[i]?.backgroundColor = ColorManager.randomColor()
-            }
             
             labels[i]?.text = "\(result.sentence) – \(result.correctAnswer)"
 

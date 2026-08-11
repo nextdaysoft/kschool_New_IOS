@@ -24,6 +24,7 @@ class Fraction: BaseViewController {
     @IBOutlet weak var resultImage: UIImageView!
     @IBOutlet weak var HeaderView: UIView!
     @IBOutlet weak var statusView: UIView!
+    
     // MARK: Variable
     private var questions: [FractionQuestion] = []
     private var currentIndex = 0
@@ -76,9 +77,7 @@ class Fraction: BaseViewController {
             statusView.backgroundColor = .white
 
             scoreView.backgroundColor = .white
-
             btnNext.backgroundColor = .white
-            btnNext.setTitleColor(.black, for: .normal)
 
         } else {
 
@@ -88,9 +87,7 @@ class Fraction: BaseViewController {
             statusView.backgroundColor = color
 
             scoreView.backgroundColor = color
-
             btnNext.backgroundColor = color
-            btnNext.setTitleColor(.white, for: .normal)
         }
     }
     
@@ -264,6 +261,9 @@ class Fraction: BaseViewController {
             loadQuestion()
         }
     }
+    
+
+    
 }
 extension Fraction: UICollectionViewDataSource, UICollectionViewDelegate {
 

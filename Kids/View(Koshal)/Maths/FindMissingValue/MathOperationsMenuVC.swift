@@ -58,8 +58,25 @@ class MathOperationsMenuVC: BaseViewController {
         applyTheme()
         updateLevelImages()
         updateResetVisibility()
+        updatePercentageLabels()
     }
     
+    func updatePercentageLabels() {
+
+        let defaults = UserDefaults.standard
+
+        if defaults.object(forKey: "mathOperationsLevel1Percentage") != nil {
+            label1.text = "\(getPercentage(for: 1))%"
+        } else {
+            label1.text = ""
+        }
+
+        if defaults.object(forKey: "mathOperationsLevel2Percentage") != nil {
+            label2.text = "\(getPercentage(for: 2))%"
+        } else {
+            label2.text = ""
+        }
+    }
     
     func updateResetVisibility() {
         
@@ -171,16 +188,20 @@ class MathOperationsMenuVC: BaseViewController {
     }
 
     @IBAction func restTapBtn(_ sender: UIButton) {
+
         let defaults = UserDefaults.standard
 
         for i in 1...2 {
+
             defaults.removeObject(forKey: "mathOperationsLevel\(i)Completed")
+            defaults.removeObject(forKey: "mathOperationsLevel\(i)Percentage")
         }
-        
+
         defaults.synchronize()
 
         updateLevelImages()
         updateResetVisibility()
+        updatePercentageLabels()   // <-- Add this
     }
     
 }

@@ -72,12 +72,6 @@ class FillTheMissingLetterResultLevel6VC: BaseViewController {
              bgViews[i]?.layer.cornerRadius = 15
              bgViews[i]?.layer.borderWidth = 3
 
-             if UserDefaults.standard.bool(forKey: "WhiteTheme") {
-                 bgViews[i]?.backgroundColor = .white
-             } else {
-                 bgViews[i]?.backgroundColor = ColorManager.randomColor()
-             }
-             
              if result.isCorrect {
                  labels[i]?.text = "\(result.correctWord)"
                  bgViews[i]?.layer.borderColor = UIColor.systemGreen.cgColor
@@ -104,31 +98,22 @@ class FillTheMissingLetterResultLevel6VC: BaseViewController {
          nextBtn.layer.cornerRadius = 6
      }
 
-     func applyTheme() {
+    func applyTheme() {
 
-         if UserDefaults.standard.bool(forKey: "WhiteTheme") {
+        if UserDefaults.standard.bool(forKey: "WhiteTheme") {
 
-             HeaderView.backgroundColor = .white
-             statusView.backgroundColor = .white
+            HeaderView.backgroundColor = .white
+            statusView.backgroundColor = .white
+            nextBtn.backgroundColor = .white
+        } else {
 
-             nextBtn.backgroundColor = .white
-             nextBtn.setTitleColor(.black, for: .normal)
+            let color = ColorManager.randomColor()
 
-             scoreBGVIew.backgroundColor = .white
-
-         } else {
-
-             let color = ColorManager.randomColor()
-
-             HeaderView.backgroundColor = color
-             statusView.backgroundColor = color
-
-             nextBtn.backgroundColor = color
-             nextBtn.setTitleColor(.white, for: .normal)
-
-             scoreBGVIew.backgroundColor = color
-         }
-     }
+            HeaderView.backgroundColor = color
+            statusView.backgroundColor = color
+            nextBtn.backgroundColor = color
+        }
+    }
 
      func resultImage(for percentage: Int) -> UIImage? {
          return UIImage(named: "well-done")

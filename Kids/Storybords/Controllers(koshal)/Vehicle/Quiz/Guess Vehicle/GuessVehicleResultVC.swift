@@ -35,9 +35,7 @@ class GuessVehicleResultVC: BaseViewController {
         if let url = Bundle.main.url(forResource: "celebration", withExtension: "gif") {
             gifImage.sd_setImage(with: url)
         }
-        
-        scoreBGVIew.layer.cornerRadius = 10
-        nextBtn.layer.cornerRadius = 10
+
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -51,6 +49,8 @@ class GuessVehicleResultVC: BaseViewController {
         let img = UIImage(systemName: "arrow.backward.circle", withConfiguration: config)
         backBtn.setImage(img, for: .normal)
         backBtn.tintColor = #colorLiteral(red: 0.1718951762, green: 0.212508589, blue: 0.3281655014, alpha: 1)
+        scoreBGVIew.layer.cornerRadius = 6
+        nextBtn.layer.cornerRadius = 6
     }
 
     func applyTheme() {
@@ -59,11 +59,7 @@ class GuessVehicleResultVC: BaseViewController {
 
             HeaderView.backgroundColor = .white
             statusView.backgroundColor = .white
-
-            scoreBGVIew.backgroundColor = .white
-
             nextBtn.backgroundColor = .white
-            nextBtn.setTitleColor(.black, for: .normal)
 
         } else {
 
@@ -71,11 +67,7 @@ class GuessVehicleResultVC: BaseViewController {
 
             HeaderView.backgroundColor = color
             statusView.backgroundColor = color
-
-            scoreBGVIew.backgroundColor = color
-
             nextBtn.backgroundColor = color
-            nextBtn.setTitleColor(.white, for: .normal)
         }
     }
     

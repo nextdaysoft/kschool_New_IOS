@@ -176,15 +176,10 @@ class CalculateMoneyVC: BaseViewController {
             HeaderView.backgroundColor = .white
             statusView.backgroundColor = .white
 
-            scoreLblBGView.backgroundColor = .white
-            totalLblBGView.backgroundColor = .white
-
             nextAndSubimtTapbtn.backgroundColor = .white
-            nextAndSubimtTapbtn.setTitleColor(.black, for: .normal)
 
             buttons.forEach {
                 $0?.backgroundColor = .white
-                $0?.setTitleColor(.black, for: .normal)
             }
 
         } else {
@@ -194,15 +189,10 @@ class CalculateMoneyVC: BaseViewController {
             HeaderView.backgroundColor = color
             statusView.backgroundColor = color
 
-            scoreLblBGView.backgroundColor = color
-            totalLblBGView.backgroundColor = .white
-
             nextAndSubimtTapbtn.backgroundColor = color
-            nextAndSubimtTapbtn.setTitleColor(.white, for: .normal)
 
             buttons.forEach {
                 $0?.backgroundColor = ColorManager.randomColor()
-                $0?.setTitleColor(.white, for: .normal)
             }
         }
     }
@@ -438,11 +428,150 @@ class CalculateMoneyVC: BaseViewController {
         totalLbl.text = userAnswers[3]   // ✅ ADD
     }
     
+    func createPDF() -> URL? {
+
+        let pdfURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("CalculateMoney.pdf")
+
+        view.layoutIfNeeded()
+
+        // Sirf required views capture honge
+        let captureViews: [UIView] = [
+            firstImg,
+            firstNu,
+            firstsimbel,
+
+            secondImg,
+            secondNu,
+            secondsimbel,
+
+            thirdImg,
+            thirdNu,
+            thirdsimbel,
+            thirdScondSimbel,
+
+            firsLblBGView,
+            secondBGView,
+            thirdLblBGView,
+            totalLblBGView,      // ✅ Added
+
+            firsLbl,
+            secondLbl,
+            thirdLbl,
+            totalLbl             // ✅ Added
+        ]
+
+        guard let firstView = captureViews.first else { return nil }
+
+        var captureRect = firstView.superview!.convert(firstView.frame, to: view)
+
+        for item in captureViews.dropFirst() {
+
+            // Hidden third view automatically skip
+            guard !item.isHidden else { continue }
+
+            let rect = item.superview!.convert(item.frame, to: view)
+            captureRect = captureRect.union(rect)
+        }
+
+        captureRect = captureRect.insetBy(dx: -20, dy: -20)
+
+        let renderer = UIGraphicsImageRenderer(size: captureRect.size)
+
+        let image = renderer.image { _ in
+
+            view.drawHierarchy(
+                in: CGRect(
+                    x: -captureRect.origin.x,
+                    y: -captureRect.origin.y,
+                    width: view.bounds.width,
+                    height: view.bounds.height
+                ),
+                afterScreenUpdates: true
+            )
+        }
+
+        let pageWidth: CGFloat = 595
+        let pageHeight: CGFloat = 842
+
+        let pdfRenderer = UIGraphicsPDFRenderer(
+            bounds: CGRect(
+                x: 0,
+                y: 0,
+                width: pageWidth,
+                height: pageHeight
+            )
+        )
+
+        do {
+
+            try pdfRenderer.writePDF(to: pdfURL) { context in
+
+                context.beginPage()
+
+                let title = "Fill in the boxes and calculate the total money"
+
+                title.draw(
+                    in: CGRect(
+                        x: 20,
+                        y: 20,
+                        width: pageWidth - 40,
+                        height: 60
+                    ),
+                    withAttributes: [
+                        .font: UIFont.boldSystemFont(ofSize: 22),
+                        .foregroundColor: UIColor.black
+                    ]
+                )
+
+                let maxWidth = pageWidth - 40
+                let maxHeight = pageHeight - 120
+
+                let scale = min(
+                    maxWidth / image.size.width,
+                    maxHeight / image.size.height
+                )
+
+                let drawWidth = image.size.width * scale
+                let drawHeight = image.size.height * scale
+
+                image.draw(
+                    in: CGRect(
+                        x: (pageWidth - drawWidth) / 2,
+                        y: 95,
+                        width: drawWidth,
+                        height: drawHeight
+                    )
+                )
+            }
+
+            return pdfURL
+
+        } catch {
+
+            print(error)
+            return nil
+        }
+    }
+    
     @IBAction func backBtnAction(_ sender: Any) {
         self.navigationController?.popViewController(animated: true)
     }
     
     @IBAction func pdfTapBtn(_ sender: UIButton) {
+
+        guard let url = createPDF() else { return }
+
+        let activityVC = UIActivityViewController(
+            activityItems: [url],
+            applicationActivities: nil
+        )
+
+        if let pop = activityVC.popoverPresentationController {
+            pop.sourceView = sender
+        }
+
+        present(activityVC, animated: true)
     }
 
     @IBAction func btn1(_ sender: UIButton) { appendNumber("1") }
@@ -597,4 +726,5 @@ class CalculateMoneyVC: BaseViewController {
             }
         }
     }
+  
 }

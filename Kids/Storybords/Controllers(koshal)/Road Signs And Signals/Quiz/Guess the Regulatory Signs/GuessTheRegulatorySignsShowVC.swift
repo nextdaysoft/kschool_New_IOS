@@ -72,7 +72,6 @@ class GuessTheRegulatorySignsShowVC: BaseViewController, AVSpeechSynthesizerDele
         view3.layer.cornerRadius = 10
         view4.layer.cornerRadius = 10
         
-        scoreBGVIew.layer.cornerRadius = 10
         gussNameLabelBgView.layer.cornerRadius = 10
         
         view1.addGestureRecognizer(tap1)
@@ -101,6 +100,7 @@ class GuessTheRegulatorySignsShowVC: BaseViewController, AVSpeechSynthesizerDele
         backBtn.tintColor = #colorLiteral(red: 0.1718951762, green: 0.212508589, blue: 0.3281655014, alpha: 1)
         HeaderView.backgroundColor = color
         statusView.backgroundColor = color
+        scoreBGVIew.layer.cornerRadius = 6
         nextBtn.layer.cornerRadius = 6
         nextBtn.backgroundColor = color
     }

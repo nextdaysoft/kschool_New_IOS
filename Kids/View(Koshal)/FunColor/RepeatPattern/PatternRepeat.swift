@@ -827,10 +827,7 @@ class PatternRepeat: BaseViewController {
             scoreView.backgroundColor = .white
 
             nextBtn.backgroundColor = .white
-            nextBtn.setTitleColor(.black, for: .normal)
-
             resetBtn.backgroundColor = .white
-            resetBtn.setTitleColor(.black, for: .normal)
 
         } else {
 
@@ -842,10 +839,7 @@ class PatternRepeat: BaseViewController {
             scoreView.backgroundColor = color
 
             nextBtn.backgroundColor = color
-            nextBtn.setTitleColor(.white, for: .normal)
-
             resetBtn.backgroundColor = color
-            resetBtn.setTitleColor(.white, for: .normal)
         }
     }
     

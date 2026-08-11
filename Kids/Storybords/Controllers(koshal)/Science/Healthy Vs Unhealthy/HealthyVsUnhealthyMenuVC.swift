@@ -101,8 +101,10 @@ class HealthyVsUnhealthyMenuVC: BaseViewController {
 
         } else {
 
-            HeaderView.backgroundColor = ColorManager.randomColor()
-            statusView.backgroundColor = ColorManager.randomColor()
+            let color = ColorManager.randomColor()
+
+            HeaderView.backgroundColor = color
+            statusView.backgroundColor = color
 
             cardViews.forEach {
                 $0?.backgroundColor = ColorManager.randomColor()

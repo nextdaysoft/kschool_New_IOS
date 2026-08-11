@@ -38,6 +38,8 @@ class FindNumberVC: BaseViewController {
     @IBOutlet weak var enterNumberLaleblBGView: UIView!
     @IBOutlet weak var allRightOrWrongImageView: UIImageView!
     
+    @IBOutlet weak var pdfBtn: UIButton!
+    
     var currentAnswer: Int = 0
     var userAnswer: String = ""
 
@@ -99,7 +101,6 @@ class FindNumberVC: BaseViewController {
         
         btnX.layer.cornerRadius = 5
         btnX.backgroundColor = .systemRed
-        btnX.setTitleColor(.white, for: .normal)
         
         enterNumberLaleblBGView.layer.cornerRadius = 5
         scoreView.layer.cornerRadius = 10
@@ -144,15 +145,12 @@ class FindNumberVC: BaseViewController {
             HeaderView.backgroundColor = .white
             statusView.backgroundColor = .white
 
-            scoreView.backgroundColor = .white
             enterNumberLaleblBGView.backgroundColor = .white
 
             nextBtn.backgroundColor = .white
-            nextBtn.setTitleColor(.black, for: .normal)
 
             keypadButtons.forEach {
                 $0?.backgroundColor = .white
-                $0?.setTitleColor(.black, for: .normal)
             }
 
         } else {
@@ -162,15 +160,12 @@ class FindNumberVC: BaseViewController {
             HeaderView.backgroundColor = color
             statusView.backgroundColor = color
 
-            scoreView.backgroundColor = color
             enterNumberLaleblBGView.backgroundColor = .white
 
             nextBtn.backgroundColor = color
-            nextBtn.setTitleColor(.white, for: .normal)
 
             keypadButtons.forEach {
                 $0?.backgroundColor = ColorManager.randomColor()
-                $0?.setTitleColor(.white, for: .normal)
             }
         }
     }
@@ -429,6 +424,118 @@ class FindNumberVC: BaseViewController {
                 animated: true
             )
         }
+    }
+    
+    func createPDF() -> URL? {
+
+        let pdfURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("FindNumber.pdf")
+
+        view.layoutIfNeeded()
+
+        let views: [UIView] = [
+            abacusView,
+            enterNumberLaleblBGView
+        ]
+
+        guard let first = views.first else { return nil }
+
+        var captureRect = first.superview!.convert(first.frame, to: view)
+
+        for v in views.dropFirst() {
+            let rect = v.superview!.convert(v.frame, to: view)
+            captureRect = captureRect.union(rect)
+        }
+
+        // Padding
+        captureRect = captureRect.insetBy(dx: -10, dy: -10)
+
+        let renderer = UIGraphicsImageRenderer(size: captureRect.size)
+
+        let image = renderer.image { _ in
+            view.drawHierarchy(
+                in: CGRect(
+                    x: -captureRect.origin.x,
+                    y: -captureRect.origin.y,
+                    width: view.bounds.width,
+                    height: view.bounds.height
+                ),
+                afterScreenUpdates: true
+            )
+        }
+
+        let pageWidth: CGFloat = 595
+        let pageHeight: CGFloat = 842
+
+        let pdfRenderer = UIGraphicsPDFRenderer(
+            bounds: CGRect(x: 0, y: 0, width: pageWidth, height: pageHeight)
+        )
+
+        do {
+
+            try pdfRenderer.writePDF(to: pdfURL) { context in
+
+                context.beginPage()
+
+                let title = "Write the number shown on the abacus."
+
+                title.draw(
+                    in: CGRect(
+                        x: 20,
+                        y: 20,
+                        width: pageWidth - 40,
+                        height: 35
+                    ),
+                    withAttributes: [
+                        .font: UIFont.boldSystemFont(ofSize: 24),
+                        .foregroundColor: UIColor.black
+                    ]
+                )
+
+                let maxWidth = pageWidth - 40
+                let maxHeight = pageHeight - 90
+
+                let scale = min(
+                    maxWidth / image.size.width,
+                    maxHeight / image.size.height
+                )
+
+                let width = image.size.width * scale
+                let height = image.size.height * scale
+
+                image.draw(
+                    in: CGRect(
+                        x: (pageWidth - width) / 2,
+                        y: 70,
+                        width: width,
+                        height: height
+                    )
+                )
+            }
+
+            return pdfURL
+
+        } catch {
+
+            print(error)
+            return nil
+        }
+    }
+    
+    @IBAction func pdfTapBtn(_ sender: UIButton) {
+
+        guard let url = createPDF() else { return }
+
+        let activityVC = UIActivityViewController(
+            activityItems: [url],
+            applicationActivities: nil
+        )
+
+        if let pop = activityVC.popoverPresentationController {
+            pop.sourceView = sender
+        }
+
+        present(activityVC, animated: true)
     }
     
 }

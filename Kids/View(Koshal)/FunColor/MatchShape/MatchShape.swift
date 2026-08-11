@@ -102,10 +102,7 @@ class MatchShape: BaseViewController,DraggableImageViewDelegate {
             statusView.backgroundColor = .white
 
             nextBtn.backgroundColor = .white
-            nextBtn.setTitleColor(.black, for: .normal)
-
             resetBtn.backgroundColor = .white
-            resetBtn.setTitleColor(.black, for: .normal)
 
             jobLblView.backgroundColor = .white
             jobLbl.textColor = .black
@@ -118,11 +115,8 @@ class MatchShape: BaseViewController,DraggableImageViewDelegate {
             statusView.backgroundColor = color
 
             nextBtn.backgroundColor = color
-            nextBtn.setTitleColor(.white, for: .normal)
-
             resetBtn.backgroundColor = color
-            resetBtn.setTitleColor(.white, for: .normal)
-
+        
             jobLblView.backgroundColor = ColorManager.randomColor()
             jobLbl.textColor = .white
         }

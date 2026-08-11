@@ -80,9 +80,6 @@ class Numbers: BaseViewController {
             nextBtn.backgroundColor = .white
             repeatBtn.backgroundColor = .white
 
-            nextBtn.setTitleColor(.black, for: .normal)
-            repeatBtn.setTitleColor(.black, for: .normal)
-
         } else {
 
             let color = ColorManager.randomColor()
@@ -92,9 +89,6 @@ class Numbers: BaseViewController {
 
             nextBtn.backgroundColor = color
             repeatBtn.backgroundColor = color
-
-            nextBtn.setTitleColor(.white, for: .normal)
-            repeatBtn.setTitleColor(.white, for: .normal)
         }
     }
     

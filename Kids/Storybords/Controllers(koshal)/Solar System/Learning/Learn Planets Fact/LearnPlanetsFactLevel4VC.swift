@@ -786,30 +786,36 @@ class LearnPlanetsFactLevel4VC: BaseViewController,AVSpeechSynthesizerDelegate {
                     // Color Bar
                     let barRect = CGRect(
                         x: cardRect.minX,
-                        y: cardRect.maxY - 50,
+                        y: cardRect.maxY - 70,
                         width: cardWidth,
-                        height: 50
+                        height: 70
                     )
 
                     ColorManager.randomColor().setFill()
-
                     UIBezierPath(rect: barRect).fill()
 
-                    // Fruit Name
+                    // Planet Fact
                     let text = item.text
 
+                    let paragraphStyle = NSMutableParagraphStyle()
+                    paragraphStyle.alignment = .center
+                    paragraphStyle.lineBreakMode = .byWordWrapping
+
                     let attrs: [NSAttributedString.Key: Any] = [
-                        .font: UIFont.boldSystemFont(ofSize: 22),
-                        .foregroundColor: UIColor.black
+                        .font: UIFont.boldSystemFont(ofSize: 14),
+                        .foregroundColor: UIColor.black,
+                        .paragraphStyle: paragraphStyle
                     ]
 
-                    let textSize = text.size(withAttributes: attrs)
+                    let textRect = CGRect(
+                        x: barRect.minX + 8,
+                        y: barRect.minY + 5,
+                        width: barRect.width - 16,
+                        height: barRect.height - 10
+                    )
 
-                    text.draw(
-                        at: CGPoint(
-                            x: barRect.midX - textSize.width / 2,
-                            y: barRect.midY - textSize.height / 2
-                        ),
+                    (text as NSString).draw(
+                        in: textRect,
                         withAttributes: attrs
                     )
 

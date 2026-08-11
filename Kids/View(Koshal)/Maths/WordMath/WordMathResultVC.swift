@@ -57,11 +57,11 @@ class WordMathResultVC: BaseViewController {
         setup()
         applyTheme()
 
-        scoreBGVIew.layer.cornerRadius = 10
+        scoreBGVIew.layer.cornerRadius = 6
         
         titelLbl.text = "Word Math"
         
-        nextBtn.layer.cornerRadius = 10
+        nextBtn.layer.cornerRadius = 6
  
         let labels = [label1, label2, label3, label4, label5,
                       label6, label7, label8, label9, label10]
@@ -115,11 +115,7 @@ class WordMathResultVC: BaseViewController {
 
             HeaderView.backgroundColor = .white
             statusView.backgroundColor = .white
-
-            scoreBGVIew.backgroundColor = .white
-
             nextBtn.backgroundColor = .white
-            nextBtn.setTitleColor(.black, for: .normal)
 
         } else {
 
@@ -127,11 +123,7 @@ class WordMathResultVC: BaseViewController {
 
             HeaderView.backgroundColor = color
             statusView.backgroundColor = color
-
-            scoreBGVIew.backgroundColor = color
-
             nextBtn.backgroundColor = color
-            nextBtn.setTitleColor(.white, for: .normal)
         }
     }
     

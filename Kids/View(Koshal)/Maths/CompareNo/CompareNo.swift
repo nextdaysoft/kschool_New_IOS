@@ -35,6 +35,7 @@ class CompareNo: BaseViewController {
     
     @IBOutlet weak var scoreTopConstraint: NSLayoutConstraint!
     
+    @IBOutlet weak var pdfBtn: UIButton!
     
     // MARK: Variable
     private var keys: [KeypadItem] = []
@@ -231,6 +232,125 @@ class CompareNo: BaseViewController {
         }
     }
     
+    func createPDF() -> URL? {
+
+        let pdfURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("CompareNumbers.pdf")
+
+        view.layoutIfNeeded()
+
+        let hiddenViews: [(UIView, Bool)] = [
+            (HeaderView, HeaderView.isHidden),
+            (statusView, statusView.isHidden),
+            (backBtn, backBtn.isHidden),
+            (lblTitle, lblTitle.isHidden),
+            (lblQuestion, lblQuestion.isHidden),
+            (lblQuestionNumber, lblQuestionNumber.isHidden),
+            (scoreMainView, scoreMainView.isHidden),
+            (scoreView, scoreView.isHidden),
+            (btnNext, btnNext.isHidden),
+            (pdfBtn, pdfBtn.isHidden),
+            (tickView, tickView.isHidden),
+            (resultImage, resultImage.isHidden),
+            (collView, collView.isHidden)
+        ]
+
+        hiddenViews.forEach { $0.0.isHidden = true }
+
+        view.layoutIfNeeded()
+
+        let captureViews: [UIView] = [
+            bfafterView,
+            keyPad
+        ]
+
+        guard let first = captureViews.first else { return nil }
+
+        var captureRect = first.superview!.convert(first.frame, to: view)
+
+        for v in captureViews.dropFirst() {
+            let rect = v.superview!.convert(v.frame, to: view)
+            captureRect = captureRect.union(rect)
+        }
+
+        captureRect = captureRect.insetBy(dx: -20, dy: -20)
+
+        let renderer = UIGraphicsImageRenderer(size: captureRect.size)
+
+        let image = renderer.image { _ in
+            self.view.drawHierarchy(
+                in: CGRect(
+                    x: -captureRect.origin.x,
+                    y: -captureRect.origin.y,
+                    width: self.view.bounds.width,
+                    height: self.view.bounds.height
+                ),
+                afterScreenUpdates: true
+            )
+        }
+
+        hiddenViews.forEach {
+            $0.0.isHidden = $0.1
+        }
+
+        let pageWidth: CGFloat = 595
+        let pageHeight: CGFloat = 842
+
+        let pdfRenderer = UIGraphicsPDFRenderer(
+            bounds: CGRect(x: 0, y: 0, width: pageWidth, height: pageHeight)
+        )
+
+        do {
+
+            try pdfRenderer.writePDF(to: pdfURL) { context in
+
+                context.beginPage()
+
+                let title = "Choose the correct symbol between the number"
+
+                title.draw(
+                    in: CGRect(
+                        x: 20,
+                        y: 20,
+                        width: pageWidth - 40,
+                        height: 35
+                    ),
+                    withAttributes: [
+                        .font: UIFont.boldSystemFont(ofSize: 24),
+                        .foregroundColor: UIColor.black
+                    ]
+                )
+
+                let maxWidth = pageWidth - 40
+                let maxHeight = pageHeight - 100
+
+                let scale = min(
+                    maxWidth / image.size.width,
+                    maxHeight / image.size.height
+                )
+
+                let width = image.size.width * scale
+                let height = image.size.height * scale
+
+                image.draw(
+                    in: CGRect(
+                        x: (pageWidth - width) / 2,
+                        y: 80,
+                        width: width,
+                        height: height
+                    )
+                )
+            }
+
+            return pdfURL
+
+        } catch {
+
+            print(error)
+            return nil
+        }
+    }
+    
     // MARK: Action
     @IBAction func btnBackAction(_ sender: Any) {
         self.navigationController?.popViewController(animated: true)
@@ -246,6 +366,22 @@ class CompareNo: BaseViewController {
         }
 
         generateQuestion()
+    }
+    
+    @IBAction func pdfTapBtn(_ sender: UIButton) {
+
+        guard let url = createPDF() else { return }
+
+        let activityVC = UIActivityViewController(
+            activityItems: [url],
+            applicationActivities: nil
+        )
+
+        if let pop = activityVC.popoverPresentationController {
+            pop.sourceView = sender
+        }
+
+        present(activityVC, animated: true)
     }
     
 }

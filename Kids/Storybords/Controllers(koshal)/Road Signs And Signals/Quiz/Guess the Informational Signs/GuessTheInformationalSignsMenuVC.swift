@@ -342,7 +342,26 @@ class GuessTheInformationalSignsMenuVC: BaseViewController {
     }
     
     @IBAction func restTapBtn(_ sender: UIButton) {
-        UserDefaults.standard.removeObject(forKey: "guessTheInformationalSignsLevel")
+
+        // Remove level data
+        UserDefaults.standard.removeObject(
+            forKey: "guessTheInformationalSignsLevelData"
+        )
+
+        // Remove completed & percentage
+        for i in 1...3 {
+
+            UserDefaults.standard.removeObject(
+                forKey: "guessTheInformationalSignsLevel\(i)Completed"
+            )
+
+            UserDefaults.standard.removeObject(
+                forKey: "guessTheInformationalSignsLevel\(i)Percentage"
+            )
+        }
+
+        UserDefaults.standard.synchronize()
+
         updateLevelImages()
         updateResetVisibility()
     }

@@ -82,11 +82,7 @@ class ArrangeMonthsVC: BaseViewController {
         addDragGesture()
         setCornerRadius()
         lockViewSize()
-        submitBtn.layer.cornerRadius = 10
-    
-        submitBtn.layer.cornerRadius = 10
-        submitBtn.backgroundColor = ColorManager.randomColor()
-        
+      
         view1.layer.cornerRadius = 10
         view1.backgroundColor = ColorManager.randomColor()
         
@@ -219,6 +215,8 @@ class ArrangeMonthsVC: BaseViewController {
         backBtn.tintColor = #colorLiteral(red: 0.1718951762, green: 0.212508589, blue: 0.3281655014, alpha: 1)
         HeaderView.backgroundColor = color
         statusView.backgroundColor = color
+        submitBtn.layer.cornerRadius = 6
+        submitBtn.backgroundColor = color
     }
     
     

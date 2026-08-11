@@ -67,7 +67,6 @@ class CalendarMenuVC: BaseViewController {
         
         viewBG1.isHidden = true
         viewBG2.isHidden = true
-        
         viewBG3.isHidden = true
     }
     
@@ -103,27 +102,17 @@ class CalendarMenuVC: BaseViewController {
     
     func setupAgeWiseUI() {
 
-        let selectedAge = UserDefaults.standard.string(
-            forKey: "userAge"
-        ) ?? ""
+        let selectedAge = UserDefaults.standard.string(forKey: "userAge") ?? ""
 
         if selectedAge == "1 - 6 yrs" {
 
             learningView.isHidden = false
             quizView.isHidden = true
 
-            viewBG1.isHidden = true
-            viewBG2.isHidden = true
-            viewBG3.isHidden = true
-
         } else {
 
             learningView.isHidden = false
             quizView.isHidden = false
-
-            viewBG1.isHidden = true
-            viewBG2.isHidden = true
-            viewBG3.isHidden = true
         }
     }
     

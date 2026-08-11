@@ -46,6 +46,7 @@ class MatchTheWordLevel5VC: BaseViewController {
     @IBOutlet weak var HeaderView: UIView!
     @IBOutlet weak var statusView: UIView!
     
+    @IBOutlet weak var pdfBtn: UIButton!
     
     // MARK: - Variables (SAME AS MatchImageWithLetterVC)
     var startView: UIView?
@@ -438,7 +439,149 @@ class MatchTheWordLevel5VC: BaseViewController {
         return view.superview?.convert(p, to: self.view) ?? .zero
     }
     
+    func createWordsPDF() -> URL? {
 
+        let pdfURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("MatchTheWordLevel.pdf")
+
+        let pageWidth: CGFloat = 595
+        let pageHeight: CGFloat = 842
+
+        let renderer = UIGraphicsPDFRenderer(
+            bounds: CGRect(x: 0, y: 0, width: pageWidth, height: pageHeight)
+        )
+
+        do {
+
+            try renderer.writePDF(to: pdfURL) { context in
+
+                context.beginPage()
+
+                // MARK: Title
+
+                let title = "Match The Word"
+
+                let attrs: [NSAttributedString.Key: Any] = [
+                    .font: UIFont.boldSystemFont(ofSize: 30),
+                    .foregroundColor: UIColor.black
+                ]
+
+                let size = title.size(withAttributes: attrs)
+
+                title.draw(
+                    at: CGPoint(
+                        x: (pageWidth - size.width) / 2,
+                        y: 40
+                    ),
+                    withAttributes: attrs
+                )
+
+                let leftBGs = [
+                    firstNLabelBGView1!,
+                    firstNLabelBGView2!,
+                    firstNLabelBGView3!,
+                    firstNLabelBGView4!,
+                    firstNLabelBGView5!
+                ]
+
+                let rightBGs = [
+                    lastNLabelBGView1!,
+                    lastNLabelBGView2!,
+                    lastNLabelBGView3!,
+                    lastNLabelBGView4!,
+                    lastNLabelBGView5!
+                ]
+
+                let leftLabels = [
+                    firstNameLabel1!,
+                    firstNameLabel2!,
+                    firstNameLabel3!,
+                    firstNameLabel4!,
+                    firstNameLabel5!
+                ]
+
+                let rightLabels = [
+                    lastNameLabel1!,
+                    lastNameLabel2!,
+                    lastNameLabel3!,
+                    lastNameLabel4!,
+                    lastNameLabel5!
+                ]
+
+                let leftX: CGFloat = 40
+                let rightX: CGFloat = 335
+
+                var y: CGFloat = 120
+
+                for i in 0..<5 {
+
+                    drawWordBox(
+                        bgColor: leftBGs[i].backgroundColor ?? .systemBlue,
+                        text: leftLabels[i].text ?? "",
+                        x: leftX,
+                        y: y,
+                        context: context.cgContext
+                    )
+
+                    drawWordBox(
+                        bgColor: rightBGs[i].backgroundColor ?? .systemBlue,
+                        text: rightLabels[i].text ?? "",
+                        x: rightX,
+                        y: y,
+                        context: context.cgContext
+                    )
+
+                    y += 110
+                }
+            }
+
+            return pdfURL
+
+        } catch {
+
+            print(error)
+            return nil
+        }
+    }
+    
+    func drawWordBox(
+        bgColor: UIColor,
+        text: String,
+        x: CGFloat,
+        y: CGFloat,
+        context: CGContext
+    ) {
+
+        let rect = CGRect(x: x, y: y, width: 220, height: 60)
+
+        let path = UIBezierPath(
+            roundedRect: rect,
+            cornerRadius: 10
+        )
+
+        bgColor.setFill()
+        path.fill()
+
+        let paragraph = NSMutableParagraphStyle()
+        paragraph.alignment = .center
+
+        let attrs: [NSAttributedString.Key: Any] = [
+            .font: UIFont.systemFont(ofSize: 20, weight: .medium),
+            .foregroundColor: UIColor.black,
+            .paragraphStyle: paragraph
+        ]
+
+        (text as NSString).draw(
+            in: CGRect(
+                x: rect.minX + 10,
+                y: rect.minY + 18,
+                width: rect.width - 20,
+                height: 24
+            ),
+            withAttributes: attrs
+        )
+    }
+    
     // MARK: - Submit / Next
     @IBAction func submitAndNextTapBtn(_ sender: UIButton) {
 
@@ -489,6 +632,22 @@ class MatchTheWordLevel5VC: BaseViewController {
     // MARK: Action
     @IBAction func backBtnAction(_ sender: Any) {
         self.navigationController?.popViewController(animated: true)
+    }
+    
+    @IBAction func pdfTapBtn(_ sender: UIButton) {
+
+        guard let pdfURL = createWordsPDF() else { return }
+
+        let activityVC = UIActivityViewController(
+            activityItems: [pdfURL],
+            applicationActivities: nil
+        )
+
+        if let popover = activityVC.popoverPresentationController {
+            popover.sourceView = sender
+        }
+
+        present(activityVC, animated: true)
     }
     
 }

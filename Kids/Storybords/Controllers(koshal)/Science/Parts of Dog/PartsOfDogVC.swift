@@ -193,10 +193,6 @@ class PartsOfDogVC: BaseViewController {
             resetBtn.backgroundColor = .white
             showAnswerBtn.backgroundColor = .white
 
-            nextBtn.setTitleColor(.black, for: .normal)
-            resetBtn.setTitleColor(.black, for: .normal)
-            showAnswerBtn.setTitleColor(.black, for: .normal)
-
             sourceViews.forEach {
                 $0?.backgroundColor = .white
             }
@@ -211,10 +207,6 @@ class PartsOfDogVC: BaseViewController {
             nextBtn.backgroundColor = color
             resetBtn.backgroundColor = color
             showAnswerBtn.backgroundColor = color
-
-            nextBtn.setTitleColor(.white, for: .normal)
-            resetBtn.setTitleColor(.white, for: .normal)
-            showAnswerBtn.setTitleColor(.white, for: .normal)
 
             sourceViews.forEach {
                 $0?.backgroundColor = ColorManager.randomColor()

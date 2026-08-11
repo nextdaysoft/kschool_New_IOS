@@ -56,10 +56,16 @@ class AdditionLevel1ResultVC: BaseViewController {
 
         setup()
         applyTheme()
-        
+
+        if mode == .addition {
+            titelLbl.text = "Addition"
+        } else {
+            titelLbl.text = "Find The Number"
+        }
+
         scoreLbl.text = "Score : \(score) / 10"
         setupResults()
-        
+
         bgView1.layer.cornerRadius = 10
         bgView2.layer.cornerRadius = 10
         bgView3.layer.cornerRadius = 10
@@ -70,7 +76,7 @@ class AdditionLevel1ResultVC: BaseViewController {
         bgView8.layer.cornerRadius = 10
         bgView9.layer.cornerRadius = 10
         bgView10.layer.cornerRadius = 10
-        
+
         for view in ansBg1Array {
             view.layer.cornerRadius = 5
             view.clipsToBounds = true
@@ -80,7 +86,6 @@ class AdditionLevel1ResultVC: BaseViewController {
             view.layer.cornerRadius = 5
             view.clipsToBounds = true
         }
-        
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -103,11 +108,7 @@ class AdditionLevel1ResultVC: BaseViewController {
 
             HeaderView.backgroundColor = .white
             statusView.backgroundColor = .white
-
-            scoreBGView.backgroundColor = .white
-
             nextBtn.backgroundColor = .white
-            nextBtn.setTitleColor(.black, for: .normal)
 
         } else {
 
@@ -115,11 +116,7 @@ class AdditionLevel1ResultVC: BaseViewController {
 
             HeaderView.backgroundColor = color
             statusView.backgroundColor = color
-
-            scoreBGView.backgroundColor = color
-
             nextBtn.backgroundColor = color
-            nextBtn.setTitleColor(.white, for: .normal)
         }
     }
 
@@ -127,65 +124,157 @@ class AdditionLevel1ResultVC: BaseViewController {
 
         let percentage = Int((Double(score) / 10.0) * 100.0)
 
-        UserDefaults.standard.set(true,
-                                  forKey: "additionLevel1Completed")
+        if mode == .addition {
 
-        UserDefaults.standard.set(percentage,
-                                  forKey: "additionLevel1Percentage")
+            UserDefaults.standard.set(true,
+                                      forKey: "additionLevel1Completed")
+
+            UserDefaults.standard.set(percentage,
+                                      forKey: "additionLevel1Percentage")
+
+        } else {
+
+            UserDefaults.standard.set(true,
+                                      forKey: "mathOperationsLevel2Completed")
+
+            UserDefaults.standard.set(percentage,
+                                      forKey: "mathOperationsLevel2Percentage")
+        }
 
         UserDefaults.standard.synchronize()
     }
     
     func setupResults() {
 
-        for i in 0..<results.count {
+        let maxCount = min(
+            results.count,
+            lbl1Array.count,
+            lbl2Array.count,
+            lbl3Array.count,
+            lbl4Array.count,
+            ans1Array.count,
+            ans2Array.count,
+            ansBg1Array.count,
+            ansBg2Array.count,
+            resultImgArray.count,
+            signArray.count
+        )
+
+        for i in 0..<maxCount {
 
             let data = results[i]
 
-            let left = "\(data.leftNumber)"
-            let right = "\(data.rightNumber)"
+            // MARK: - Question Numbers
 
-            lbl2Array[i].text = left
-            lbl4Array[i].text = right
+            let left = String(format: "%02d", data.leftNumber)
+            let right = String(format: "%02d", data.rightNumber)
+
+            // LEFT NUMBER
+            lbl1Array[i].isHidden = false
+            lbl2Array[i].isHidden = false
+
+            lbl1Array[i].text = String(
+                left[left.startIndex]
+            )
+
+            lbl2Array[i].text = String(
+                left[left.index(after: left.startIndex)]
+            )
+
+            // RIGHT NUMBER
+            lbl3Array[i].isHidden = false
+            lbl4Array[i].isHidden = false
+
+            lbl3Array[i].text = String(
+                right[right.startIndex]
+            )
+
+            lbl4Array[i].text = String(
+                right[right.index(after: right.startIndex)]
+            )
+
+            // MARK: - Sign
 
             signArray[i].text = data.isSign ? "+" : "-"
 
-            // ANSWER
-            let answer = Int(data.userAnswer) ?? 0
-            let formatted = String(format: "%02d", answer)
+            // MARK: - Answer
 
-            ans1Array[i].text = String(formatted[formatted.startIndex])
-            ans2Array[i].text = String(formatted[formatted.index(after: formatted.startIndex)])
+            let userAnswer = Int(data.userAnswer) ?? 0
+            let correctAnswer = Int(data.correctAnswer) ?? 0
 
-            // RESULT IMAGE
-            resultImgArray[i].image = data.isCorrect
-                ? UIImage(named: "check mark")
-                : UIImage(named: "close")
+            // IMPORTANT:
+            // Actual answer compare karo
+            let isCorrect = userAnswer == correctAnswer
 
-            // COLOR
-            let color = data.isCorrect ? UIColor.systemGreen : UIColor.systemRed
+            let formatted = String(
+                format: "%02d",
+                userAnswer
+            )
 
-            ansBg1Array[i].backgroundColor = color
-            ansBg2Array[i].backgroundColor = color
-
-            // SHOW ANSWER LABELS
-            ansBg1Array[i].isHidden = false
             ans1Array[i].isHidden = false
+            ans2Array[i].isHidden = false
 
-            // HIDE UNUSED LABELS
-            lbl1Array[i].isHidden = true
-            lbl3Array[i].isHidden = true
+            ansBg1Array[i].isHidden = false
+            ansBg2Array[i].isHidden = false
+
+            // First digit
+            ans1Array[i].text = String(
+                formatted[formatted.startIndex]
+            )
+
+            // Second digit
+            ans2Array[i].text = String(
+                formatted[
+                    formatted.index(
+                        after: formatted.startIndex
+                    )
+                ]
+            )
+
+            // MARK: - Correct / Wrong Image
+
+            resultImgArray[i].isHidden = false
+
+            if isCorrect {
+
+                // ✅ CORRECT
+                resultImgArray[i].image = UIImage(named: "check mark")
+
+                ansBg1Array[i].backgroundColor = .systemGreen
+                ansBg2Array[i].backgroundColor = .systemGreen
+
+            } else {
+
+                // ❌ WRONG
+                resultImgArray[i].image = UIImage(named: "close")
+
+                ansBg1Array[i].backgroundColor = .systemRed
+                ansBg2Array[i].backgroundColor = .systemRed
+            }
         }
+
+        view.layoutIfNeeded()
     }
     
     @IBAction func backTapBtn(_ sender: UIButton) {
 
         saveLevelResult()
 
-        if let vc = navigationController?.viewControllers.first(where: {
-            $0 is AdditionLevelMenuVC
-        }) {
-            navigationController?.popToViewController(vc, animated: true)
+        if mode == .addition {
+
+            if let vc = navigationController?.viewControllers.first(where: {
+                $0 is AdditionLevelMenuVC
+            }) {
+                navigationController?.popToViewController(vc, animated: true)
+            }
+
+        } else {
+
+            if let vc = navigationController?.viewControllers.first(where: {
+                $0 is MathOperationsMenuVC
+            }) {
+                navigationController?.popToViewController(vc, animated: true)
+            }
         }
     }
     
@@ -193,10 +282,21 @@ class AdditionLevel1ResultVC: BaseViewController {
 
         saveLevelResult()
 
-        if let vc = navigationController?.viewControllers.first(where: {
-            $0 is AdditionLevelMenuVC
-        }) {
-            navigationController?.popToViewController(vc, animated: true)
+        if mode == .addition {
+
+            if let vc = navigationController?.viewControllers.first(where: {
+                $0 is AdditionLevelMenuVC
+            }) {
+                navigationController?.popToViewController(vc, animated: true)
+            }
+
+        } else {
+
+            if let vc = navigationController?.viewControllers.first(where: {
+                $0 is MathOperationsMenuVC
+            }) {
+                navigationController?.popToViewController(vc, animated: true)
+            }
         }
     }
     

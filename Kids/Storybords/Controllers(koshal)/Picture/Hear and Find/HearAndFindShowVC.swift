@@ -38,7 +38,8 @@ class HearAndFindShowVC: BaseViewController, AVSpeechSynthesizerDelegate {
     @IBOutlet weak var HeaderView: UIView!
     @IBOutlet weak var statusView: UIView!
     
-
+    @IBOutlet weak var pdfBtn: UIButton!
+    
     var birds: [BirdQuestions] = []
     var levelNumber: Int = 1
     
@@ -105,22 +106,11 @@ class HearAndFindShowVC: BaseViewController, AVSpeechSynthesizerDelegate {
     
     func applyTheme() {
 
-        let cardViews = [
-            scoreBGVIew,
-            nameOfImgLabelBGView
-        ]
-
         if UserDefaults.standard.bool(forKey: "WhiteTheme") {
 
             HeaderView.backgroundColor = .white
             statusView.backgroundColor = .white
-
             nextBtn.backgroundColor = .white
-            nextBtn.setTitleColor(.black, for: .normal)
-
-            cardViews.forEach {
-                $0?.backgroundColor = .white
-            }
 
         } else {
 
@@ -128,13 +118,7 @@ class HearAndFindShowVC: BaseViewController, AVSpeechSynthesizerDelegate {
 
             HeaderView.backgroundColor = color
             statusView.backgroundColor = color
-
             nextBtn.backgroundColor = color
-            nextBtn.setTitleColor(.white, for: .normal)
-
-            cardViews.forEach {
-                $0?.backgroundColor = ColorManager.randomColor()
-            }
         }
     }
     
@@ -278,5 +262,9 @@ class HearAndFindShowVC: BaseViewController, AVSpeechSynthesizerDelegate {
         currentQuestionIndex += 1
         setupQuestion()
     }
+    
+    @IBAction func pdfTapBtn(_ sender: UIButton) {
+    }
+    
 }
 

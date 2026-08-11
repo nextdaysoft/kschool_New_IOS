@@ -52,15 +52,9 @@ class AfterBeforeMenuVC: BaseViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setup()
-        scoreBGVIew.layer.cornerRadius = 10
+       
         
         titelLbl.text = screenTitleText
-        
-        nextBtn.layer.cornerRadius = 10
-        nextBtn.backgroundColor = ColorManager.randomColor()
-        nextBtn.layer.borderColor = UIColor.black.cgColor
- 
-        
         
         let labels = [label1, label2, label3, label4, label5,
                       label6, label7, label8, label9, label10]
@@ -101,6 +95,9 @@ class AfterBeforeMenuVC: BaseViewController {
         backBtn.tintColor = #colorLiteral(red: 0.1718951762, green: 0.212508589, blue: 0.3281655014, alpha: 1)
         HeaderView.backgroundColor = color
         statusView.backgroundColor = color
+        nextBtn.layer.cornerRadius = 6
+        nextBtn.backgroundColor = color
+        scoreBGVIew.layer.cornerRadius = 6
     }
 
   

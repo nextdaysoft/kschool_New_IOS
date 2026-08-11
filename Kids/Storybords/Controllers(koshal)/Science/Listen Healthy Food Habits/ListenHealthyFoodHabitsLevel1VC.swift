@@ -30,6 +30,9 @@ class ListenHealthyFoodHabitsLevel1VC: BaseViewController,AVSpeechSynthesizerDel
     
     @IBOutlet weak var LevelLabel: UILabel!
     
+    @IBOutlet weak var pdfBtn: UIButton!
+   
+    
     var planets: [LearnPlanetsItem] = []
     
     var speechSynthesizer = AVSpeechSynthesizer()
@@ -683,6 +686,143 @@ class ListenHealthyFoodHabitsLevel1VC: BaseViewController,AVSpeechSynthesizerDel
         imgBGView.layer.borderColor = randomColor.cgColor
     }
     
+    func createHealthyFoodHabitsPDF() -> URL? {
+
+        let pdfURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("HealthyFoodHabits.pdf")
+
+        let pageWidth: CGFloat = 595
+        let pageHeight: CGFloat = 842
+
+        let renderer = UIGraphicsPDFRenderer(
+            bounds: CGRect(x: 0, y: 0, width: pageWidth, height: pageHeight)
+        )
+
+        do {
+
+            try renderer.writePDF(to: pdfURL) { context in
+
+                context.beginPage()
+
+                // Title
+                let title = "Healthy Food Habits"
+
+                let titleAttributes: [NSAttributedString.Key: Any] = [
+                    .font: UIFont.boldSystemFont(ofSize: 30),
+                    .foregroundColor: UIColor.black
+                ]
+
+                let titleSize = title.size(withAttributes: titleAttributes)
+
+                title.draw(
+                    at: CGPoint(
+                        x: (pageWidth - titleSize.width) / 2,
+                        y: 30
+                    ),
+                    withAttributes: titleAttributes
+                )
+
+                let cardWidth: CGFloat = 220
+                let cardHeight: CGFloat = 180
+
+                let startX: CGFloat = 50
+                let spacingX: CGFloat = 30
+
+                var xPos = startX
+                var yPos: CGFloat = 100
+
+                for (index, item) in planets.enumerated() {
+
+                    let cardRect = CGRect(
+                        x: xPos,
+                        y: yPos,
+                        width: cardWidth,
+                        height: cardHeight
+                    )
+
+                    // Card Background
+                    let bgPath = UIBezierPath(
+                        roundedRect: cardRect,
+                        cornerRadius: 12
+                    )
+
+                    UIColor.white.setFill()
+                    bgPath.fill()
+
+                    UIColor.lightGray.setStroke()
+                    bgPath.lineWidth = 1
+                    bgPath.stroke()
+
+                    // Image
+                    if let image = UIImage(named: item.imageName) {
+
+                        image.draw(
+                            in: CGRect(
+                                x: cardRect.minX + 20,
+                                y: cardRect.minY + 10,
+                                width: cardWidth - 40,
+                                height: 100
+                            )
+                        )
+                    }
+
+                    // Bottom Color Bar
+                    let barRect = CGRect(
+                        x: cardRect.minX,
+                        y: cardRect.maxY - 70,
+                        width: cardWidth,
+                        height: 70
+                    )
+
+                    ColorManager.randomColor().setFill()
+                    UIBezierPath(rect: barRect).fill()
+
+                    // Habit Text
+                    let paragraphStyle = NSMutableParagraphStyle()
+                    paragraphStyle.alignment = .center
+                    paragraphStyle.lineBreakMode = .byWordWrapping
+
+                    let attrs: [NSAttributedString.Key: Any] = [
+                        .font: UIFont.boldSystemFont(ofSize: 14),
+                        .foregroundColor: UIColor.black,
+                        .paragraphStyle: paragraphStyle
+                    ]
+
+                    let textRect = CGRect(
+                        x: barRect.minX + 8,
+                        y: barRect.minY + 5,
+                        width: barRect.width - 16,
+                        height: barRect.height - 10
+                    )
+
+                    (item.text as NSString).draw(
+                        in: textRect,
+                        withAttributes: attrs
+                    )
+
+                    if index % 2 == 0 {
+                        xPos += cardWidth + spacingX
+                    } else {
+                        xPos = startX
+                        yPos += cardHeight + 20
+                    }
+
+                    if yPos > pageHeight - 220 {
+                        context.beginPage()
+                        yPos = 100
+                        xPos = startX
+                    }
+                }
+            }
+
+            return pdfURL
+
+        } catch {
+
+            print(error)
+            return nil
+        }
+    }
     
     @IBAction func repeatTapBtn(_ sender: UIButton) {
         speak(text: planets[currentIndex].text)
@@ -692,5 +832,20 @@ class ListenHealthyFoodHabitsLevel1VC: BaseViewController,AVSpeechSynthesizerDel
         self.navigationController?.popViewController(animated: true)
     }
     
+    @IBAction func pdfTapBtn(_ sender: UIButton) {
+
+        guard let pdfURL = createHealthyFoodHabitsPDF() else { return }
+
+        let activityVC = UIActivityViewController(
+            activityItems: [pdfURL],
+            applicationActivities: nil
+        )
+
+        if let popover = activityVC.popoverPresentationController {
+            popover.sourceView = sender
+        }
+
+        present(activityVC, animated: true)
+    }
  
 }

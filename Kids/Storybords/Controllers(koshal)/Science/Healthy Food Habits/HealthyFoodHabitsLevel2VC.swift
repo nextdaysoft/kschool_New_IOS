@@ -27,6 +27,7 @@ class HealthyFoodHabitsLevel2VC: BaseViewController {
     @IBOutlet weak var backBtn: UIButton!
     @IBOutlet weak var HeaderView: UIView!
     @IBOutlet weak var statusView: UIView!
+   
     
     var questions: [PickFoodQuestion] = [
 
@@ -178,13 +179,10 @@ class HealthyFoodHabitsLevel2VC: BaseViewController {
 
             HeaderView.backgroundColor = .white
             statusView.backgroundColor = .white
-
             nextBtn.backgroundColor = .white
-            nextBtn.setTitleColor(.black, for: .normal)
-
+        
             optionButtons.forEach {
                 $0?.backgroundColor = .white
-                $0?.setTitleColor(.black, for: .normal)
             }
 
         } else {
@@ -195,16 +193,84 @@ class HealthyFoodHabitsLevel2VC: BaseViewController {
             statusView.backgroundColor = color
 
             nextBtn.backgroundColor = color
-            nextBtn.setTitleColor(.white, for: .normal)
 
             optionButtons.forEach {
                 $0?.backgroundColor = ColorManager.randomColor()
-                $0?.setTitleColor(.white, for: .normal)
             }
         }
 
         defaultOptionBGColor = nama1Btn.backgroundColor
-        defaultOptionTextColor = nama1Btn.titleColor(for: .normal)
+    }
+    
+    func handleAnswer(_ selected: String) {
+
+        if hasAnswered { return }
+        hasAnswered = true
+
+        let q = questions[currentIndex]
+
+        let selectedSentence = q.sentence.replacingOccurrences(
+            of: q.correctAnswer,
+            with: selected
+        )
+
+        let correctSentence = q.sentence
+
+        allNameLalel.text = selectedSentence
+
+        let isCorrect = (selected == q.correctAnswer)
+
+        let result = PickFoodOptionResult(
+            selectedSentence: selectedSentence,
+            correctSentence: correctSentence,
+            isCorrect: isCorrect
+        )
+        results.append(result)
+
+        resetOptionButtons()
+
+        let buttons = [nama1Btn, nama2Btn, nama3Btn].compactMap { $0 }
+
+        guard let tappedButton = buttons.first(where: {
+            $0.title(for: .normal) == selected
+        }) else { return }
+
+        if isCorrect {
+
+            tappedButton.backgroundColor = .systemGreen
+            tappedButton.setTitleColor(.black, for: .normal)
+
+            rightOrWrongImgView.image = UIImage(named: "check mark")
+            score += 1
+
+        } else {
+
+            tappedButton.backgroundColor = .systemRed
+            tappedButton.setTitleColor(.black, for: .normal)
+
+            rightOrWrongImgView.image = UIImage(named: "close")
+
+            if let correctButton = buttons.first(where: {
+                $0.title(for: .normal) == q.correctAnswer
+            }) {
+                correctButton.backgroundColor = .systemGreen
+                correctButton.setTitleColor(.black, for: .normal)
+            }
+        }
+
+        scoreLabel.text = "\("Score".localiz()): \(score) / \(currentIndex + 1)"
+        nextBtn.isHidden = false
+    }
+    
+    
+    
+    func resetOptionButtons() {
+
+        [nama1Btn, nama2Btn, nama3Btn].forEach { button in
+
+            button?.backgroundColor = defaultOptionBGColor
+            button?.setTitleColor(.black, for: .normal)
+        }
     }
 
     // MARK: Action
@@ -259,70 +325,6 @@ class HealthyFoodHabitsLevel2VC: BaseViewController {
         nextBtn.isHidden = true
     }
     
-    func handleAnswer(_ selected: String) {
-
-        if hasAnswered { return }
-        hasAnswered = true
-
-        let q = questions[currentIndex]
-
-        let selectedSentence = q.sentence.replacingOccurrences(
-            of: q.correctAnswer,
-            with: selected
-        )
-
-        let correctSentence = q.sentence
-
-        allNameLalel.text = selectedSentence
-
-        let isCorrect = (selected == q.correctAnswer)
-
-        let result = PickFoodOptionResult(
-            selectedSentence: selectedSentence,
-            correctSentence: correctSentence,
-            isCorrect: isCorrect
-        )
-        results.append(result)
-
-        resetOptionButtons()
-
-        let buttons = [nama1Btn, nama2Btn, nama3Btn].compactMap { $0 }
-
-        guard let tappedButton = buttons.first(where: {
-            $0.title(for: .normal) == selected
-        }) else { return }
-
-        if isCorrect {
-            tappedButton.backgroundColor = .systemGreen
-            tappedButton.setTitleColor(.white, for: .normal)
-            rightOrWrongImgView.image = UIImage(named: "check mark")
-            score += 1
-        } else {
-            tappedButton.backgroundColor = .systemRed
-            tappedButton.setTitleColor(.white, for: .normal)
-            rightOrWrongImgView.image = UIImage(named: "close")
-
-            if let correctButton = buttons.first(where: {
-                $0.title(for: .normal) == q.correctAnswer
-            }) {
-                correctButton.backgroundColor = .systemGreen
-                correctButton.setTitleColor(.white, for: .normal)
-            }
-        }
-
-        scoreLabel.text = "\("Score".localiz()): \(score) / \(currentIndex + 1)"
-        
-        nextBtn.isHidden = false
-    }
-    
-    
-    func resetOptionButtons() {
-        [nama1Btn, nama2Btn, nama3Btn].forEach { button in
-            button?.backgroundColor = defaultOptionBGColor
-            button?.setTitleColor(defaultOptionTextColor, for: .normal)
-        }
-    }
-    
     // MARK: - Option Buttons
     @IBAction func option1Tap(_ sender: UIButton) {
         if let text = sender.title(for: .normal) {
@@ -364,4 +366,5 @@ class HealthyFoodHabitsLevel2VC: BaseViewController {
             navigationController?.pushViewController(vc, animated: true)
         }
     }
+   
 }

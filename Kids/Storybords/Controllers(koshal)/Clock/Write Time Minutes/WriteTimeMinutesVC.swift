@@ -50,6 +50,7 @@ class WriteTimeMinutesVC: BaseViewController {
     @IBOutlet weak var btnColonBGView: UIView!
     @IBOutlet weak var btnCutBGView: UIView!
     
+    @IBOutlet weak var pdfBtn: UIButton!
     
     var clockView: WriteTimeHoursClockVC!
 
@@ -140,9 +141,7 @@ class WriteTimeMinutesVC: BaseViewController {
             statusView.backgroundColor = .white
 
             nextBtn.backgroundColor = .white
-            nextBtn.setTitleColor(.black, for: .normal)
-
-            scoreLabelBGView.backgroundColor = .white
+          
 
             let whiteViews = [
                 btn1BGView,
@@ -183,10 +182,7 @@ class WriteTimeMinutesVC: BaseViewController {
             statusView.backgroundColor = color
 
             nextBtn.backgroundColor = color
-            nextBtn.setTitleColor(.white, for: .normal)
-
-            scoreLabelBGView.backgroundColor = color
-
+           
             let randomViews = [
                 btn1BGView,
                 btn2BGView,
@@ -283,6 +279,136 @@ class WriteTimeMinutesVC: BaseViewController {
             navigationController?.pushViewController(vc, animated: true)
         }
     }
+    
+    func createWriteTimeMinutesPDF() -> URL? {
+
+        let pdfURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("WriteTimeMinutes.pdf")
+
+        let pageWidth: CGFloat = 595
+        let pageHeight: CGFloat = 842
+
+        let renderer = UIGraphicsPDFRenderer(
+            bounds: CGRect(x: 0, y: 0, width: pageWidth, height: pageHeight)
+        )
+
+        do {
+
+            try renderer.writePDF(to: pdfURL) { context in
+
+                context.beginPage()
+
+                let title = "Write Time - Minutes"
+
+                let titleAttributes: [NSAttributedString.Key: Any] = [
+                    .font: UIFont.boldSystemFont(ofSize: 30),
+                    .foregroundColor: UIColor.black
+                ]
+
+                let titleSize = title.size(withAttributes: titleAttributes)
+
+                title.draw(
+                    at: CGPoint(
+                        x: (pageWidth - titleSize.width) / 2,
+                        y: 30
+                    ),
+                    withAttributes: titleAttributes
+                )
+
+                let cardWidth: CGFloat = 220
+                let cardHeight: CGFloat = 120
+
+                let startX: CGFloat = 50
+                let spacingX: CGFloat = 30
+
+                var xPos = startX
+                var yPos: CGFloat = 100
+
+                for (index, question) in questions.enumerated() {
+
+                    let time = "\(question.hour):\(String(format: "%02d", question.minute))"
+
+                    let cardRect = CGRect(
+                        x: xPos,
+                        y: yPos,
+                        width: cardWidth,
+                        height: cardHeight
+                    )
+
+                    context.cgContext.saveGState()
+
+                    context.cgContext.setShadow(
+                        offset: CGSize(width: 0, height: 3),
+                        blur: 6,
+                        color: UIColor.black.withAlphaComponent(0.2).cgColor
+                    )
+
+                    let shadowPath = UIBezierPath(
+                        roundedRect: cardRect,
+                        cornerRadius: 18
+                    )
+
+                    UIColor.white.setFill()
+                    shadowPath.fill()
+
+                    context.cgContext.restoreGState()
+
+                    let cardPath = UIBezierPath(
+                        roundedRect: cardRect,
+                        cornerRadius: 18
+                    )
+
+                    ColorManager.randomColor().setFill()
+                    cardPath.fill()
+
+                    UIColor.lightGray.setStroke()
+                    cardPath.lineWidth = 2
+                    cardPath.stroke()
+
+                    let paragraph = NSMutableParagraphStyle()
+                    paragraph.alignment = .center
+
+                    let attrs: [NSAttributedString.Key: Any] = [
+                        .font: UIFont.boldSystemFont(ofSize: 22),
+                        .foregroundColor: UIColor.black,
+                        .paragraphStyle: paragraph
+                    ]
+
+                    let textRect = CGRect(
+                        x: cardRect.minX + 10,
+                        y: cardRect.minY + 35,
+                        width: cardRect.width - 20,
+                        height: 50
+                    )
+
+                    (time as NSString).draw(
+                        in: textRect,
+                        withAttributes: attrs
+                    )
+
+                    if index % 2 == 0 {
+                        xPos += cardWidth + spacingX
+                    } else {
+                        xPos = startX
+                        yPos += cardHeight + 20
+                    }
+
+                    if yPos > pageHeight - 160 {
+                        context.beginPage()
+                        yPos = 100
+                        xPos = startX
+                    }
+                }
+            }
+
+            return pdfURL
+
+        } catch {
+            print(error)
+            return nil
+        }
+    }
+    
     
     @IBAction func backBtnAction(_ sender: Any) {
         self.navigationController?.popViewController(animated: true)
@@ -384,4 +510,21 @@ class WriteTimeMinutesVC: BaseViewController {
         userInput.removeLast()
         updateTimeLabel()
     }
+    
+    @IBAction func pdfTapBtn(_ sender: UIButton) {
+
+        guard let pdfURL = createWriteTimeMinutesPDF() else { return }
+
+        let activityVC = UIActivityViewController(
+            activityItems: [pdfURL],
+            applicationActivities: nil
+        )
+
+        if let popover = activityVC.popoverPresentationController {
+            popover.sourceView = sender
+        }
+
+        present(activityVC, animated: true)
+    }
+    
 }

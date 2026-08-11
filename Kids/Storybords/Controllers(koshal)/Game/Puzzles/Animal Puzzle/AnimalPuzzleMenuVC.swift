@@ -115,22 +115,51 @@ class AnimalPuzzleMenuVC: BaseViewController, UITableViewDelegate, UITableViewDa
             cell.titelLabel.text = animalTitles[indexPath.row]
             cell.titelImg.image = UIImage(named: animalImages[indexPath.row])
 
+            if SubscriptionManager.shared.isSubscribed() || indexPath.row == 0 {
+
+                // ✅ Free / Subscribed
+                cell.resultImg.image = nil
+                cell.cellBGView.backgroundColor = ColorManager.randomColor()
+
+            } else {
+
+                // 🔒 Locked
+                cell.resultImg.image = UIImage(named: "lock")
+                cell.cellBGView.backgroundColor = .systemGray4
+            }
+
         case .continent:
             cell.titelLabel.text = continentTitles[indexPath.row]
             cell.titelImg.image = UIImage(named: continentImages[indexPath.row])
-            
+
+            cell.resultImg.image = nil
+            cell.cellBGView.backgroundColor = ColorManager.randomColor()
+
         case .countrys:
             cell.titelLabel.text = countryNames[indexPath.row]
             cell.titelImg.image = UIImage(named: countryFlagImages[indexPath.row])
+
+            cell.resultImg.image = nil
+            cell.cellBGView.backgroundColor = ColorManager.randomColor()
         }
 
-        cell.cellBGView.backgroundColor = ColorManager.randomColor()
         cell.cellBGView.layer.cornerRadius = 10
 
         return cell
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+
+        // 🔒 Animal puzzle me sirf Lion free
+        if puzzleType == .animal &&
+            indexPath.row != 0 &&
+            !SubscriptionManager.shared.isSubscribed() {
+
+            let storyboard = UIStoryboard(name: "Main", bundle: nil)
+            let vc = storyboard.instantiateViewController(withIdentifier: "SubscriptionVC") as! SubscriptionVC
+            navigationController?.pushViewController(vc, animated: true)
+            return
+        }
 
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
 
@@ -145,10 +174,12 @@ class AnimalPuzzleMenuVC: BaseViewController, UITableViewDelegate, UITableViewDa
             case .continent:
                 vc.selectedDisplayImage = continentImages[indexPath.row]
                 vc.selectedPuzzleImage = continentImages[indexPath.row]
+
             case .countrys:
                 vc.selectedDisplayImage = countrysMap[indexPath.row]
                 vc.selectedPuzzleImage = countrysMap[indexPath.row]
             }
+
             navigationController?.pushViewController(vc, animated: true)
         }
     }

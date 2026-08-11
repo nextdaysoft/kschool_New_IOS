@@ -37,6 +37,8 @@ class LearnIBloodGroupsResultVC: BaseViewController {
     
     
     @IBOutlet weak var titalLabel: UILabel!
+   
+    @IBOutlet weak var newTital: UILabel!
     
     var speechSynthesizer = AVSpeechSynthesizer()
 
@@ -54,11 +56,30 @@ class LearnIBloodGroupsResultVC: BaseViewController {
         let group = bloodGroups[selectedIndex]
 
         if isDonating {
+
             titalLabel.text = "\(group.name) Can Donate To"
             showList = group.donatesTo
+
+            // Default
+            newTital.text = ""
+
+            // O- special case
+            if group.name == "O-" {
+                newTital.text = "O- blood can be given to all blood groups."
+            }
+
         } else {
+
             titalLabel.text = "\(group.name) Can Receive From"
             showList = group.receivesFrom
+
+            // Default
+            newTital.text = ""
+
+            // AB+ special case
+            if group.name == "AB+" {
+                newTital.text = "AB+ blood group can receive blood from all blood groups."
+            }
         }
 
         let allBGViews = [

@@ -177,7 +177,6 @@ class PluralFormLevel3VC: BaseViewController {
             statusView.backgroundColor = .white
 
             nextBtn.backgroundColor = .white
-            nextBtn.setTitleColor(.black, for: .normal)
 
             scoreLabelBGView.backgroundColor = .white
 
@@ -194,11 +193,6 @@ class PluralFormLevel3VC: BaseViewController {
             statusView.backgroundColor = color
 
             nextBtn.backgroundColor = color
-            nextBtn.setTitleColor(.white, for: .normal)
-
-            scoreLabelBGView.backgroundColor = color
-
-            titleView.backgroundColor = .white
 
             view1.backgroundColor = ColorManager.randomColor()
             view2.backgroundColor = ColorManager.randomColor()

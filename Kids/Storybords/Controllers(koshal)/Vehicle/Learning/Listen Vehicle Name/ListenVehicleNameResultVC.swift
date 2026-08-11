@@ -30,7 +30,7 @@ class ListenVehicleNameResultVC: BaseViewController {
             gifImage.sd_setImage(with: url)
         }
         
-        nextBtn.layer.cornerRadius = 10
+       
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -44,6 +44,7 @@ class ListenVehicleNameResultVC: BaseViewController {
         let img = UIImage(systemName: "arrow.backward.circle", withConfiguration: config)
         backBtn.setImage(img, for: .normal)
         backBtn.tintColor = #colorLiteral(red: 0.1718951762, green: 0.212508589, blue: 0.3281655014, alpha: 1)
+        nextBtn.layer.cornerRadius = 6
     }
 
     func applyTheme() {
@@ -52,19 +53,15 @@ class ListenVehicleNameResultVC: BaseViewController {
 
             HeaderView.backgroundColor = .white
             statusView.backgroundColor = .white
-
             nextBtn.backgroundColor = .white
-            nextBtn.setTitleColor(.black, for: .normal)
-
+            
         } else {
 
             let color = ColorManager.randomColor()
 
             HeaderView.backgroundColor = color
             statusView.backgroundColor = color
-
             nextBtn.backgroundColor = color
-            nextBtn.setTitleColor(.white, for: .normal)
         }
     }
     

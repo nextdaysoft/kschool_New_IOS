@@ -31,6 +31,7 @@ class PickTheCorrectSpellingLevel1VC: BaseViewController {
     @IBOutlet weak var HeaderView: UIView!
     @IBOutlet weak var statusView: UIView!
     
+    @IBOutlet weak var pdfBtn: UIButton!
     
     // MARK: - Data
     var questions = [
@@ -112,18 +113,10 @@ class PickTheCorrectSpellingLevel1VC: BaseViewController {
 
             HeaderView.backgroundColor = .white
             statusView.backgroundColor = .white
-
             nextBtn.backgroundColor = .white
-            nextBtn.setTitleColor(.black, for: .normal)
-
-            scoreLabelBGView.backgroundColor = .white
-            imgBGView.backgroundColor = .white
 
             option1Btn.backgroundColor = .white
             option2Btn.backgroundColor = .white
-
-            option1Btn.setTitleColor(.black, for: .normal)
-            option2Btn.setTitleColor(.black, for: .normal)
 
         } else {
 
@@ -131,20 +124,37 @@ class PickTheCorrectSpellingLevel1VC: BaseViewController {
 
             HeaderView.backgroundColor = color
             statusView.backgroundColor = color
-
             nextBtn.backgroundColor = color
-            nextBtn.setTitleColor(.white, for: .normal)
-
-            scoreLabelBGView.backgroundColor = color
-            imgBGView.backgroundColor = .white
 
             option1Btn.backgroundColor = ColorManager.randomColor()
             option2Btn.backgroundColor = ColorManager.randomColor()
 
-            option1Btn.setTitleColor(.white, for: .normal)
-            option2Btn.setTitleColor(.white, for: .normal)
+           
         }
     }
+    
+    // MARK: - Reset
+    func resetButtons() {
+
+        if UserDefaults.standard.bool(forKey: "WhiteTheme") {
+
+            option1Btn.backgroundColor = .white
+            option2Btn.backgroundColor = .white
+
+        } else {
+
+            option1Btn.backgroundColor = ColorManager.randomColor()
+            option2Btn.backgroundColor = ColorManager.randomColor()
+
+        }
+
+        option1Btn.isUserInteractionEnabled = true
+        option2Btn.isUserInteractionEnabled = true
+
+        nextBtn.isHidden = true
+        rightOrWrongImgView.isHidden = true
+    }
+
     
     // MARK: - Load Question
     func loadQuestion() {
@@ -215,33 +225,7 @@ class PickTheCorrectSpellingLevel1VC: BaseViewController {
         scoreLabel.text = "\("Score".localiz()): \(score) / \(currentIndex + 1)"
     }
     
-    // MARK: - Reset
-    func resetButtons() {
-
-        if UserDefaults.standard.bool(forKey: "WhiteTheme") {
-
-            option1Btn.backgroundColor = .white
-            option2Btn.backgroundColor = .white
-
-            option1Btn.setTitleColor(.black, for: .normal)
-            option2Btn.setTitleColor(.black, for: .normal)
-
-        } else {
-
-            option1Btn.backgroundColor = ColorManager.randomColor()
-            option2Btn.backgroundColor = ColorManager.randomColor()
-
-            option1Btn.setTitleColor(.white, for: .normal)
-            option2Btn.setTitleColor(.white, for: .normal)
-        }
-
-        option1Btn.isUserInteractionEnabled = true
-        option2Btn.isUserInteractionEnabled = true
-
-        nextBtn.isHidden = true
-        rightOrWrongImgView.isHidden = true
-    }
-
+ 
     // MARK: - Animation
     func animateButtons() {
 
@@ -290,4 +274,104 @@ class PickTheCorrectSpellingLevel1VC: BaseViewController {
         }
     }
 
+    func createPDF() -> URL? {
+
+        let pdfURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("Pick The Correct Spelling.pdf")
+
+        view.layoutIfNeeded()
+
+        // Sirf imgBGView ka screenshot
+        let renderer = UIGraphicsImageRenderer(size: imgBGView.bounds.size)
+
+        let image = renderer.image { _ in
+            imgBGView.drawHierarchy(in: imgBGView.bounds, afterScreenUpdates: true)
+        }
+
+        let pageRect = CGRect(x: 0, y: 0, width: 595, height: 842)
+
+        let pdfRenderer = UIGraphicsPDFRenderer(bounds: pageRect)
+
+        do {
+
+            try pdfRenderer.writePDF(to: pdfURL) { context in
+
+                context.beginPage()
+
+                // Title
+                let title = "Pick The Correct Spelling"
+                let titleAttr: [NSAttributedString.Key: Any] = [
+                    .font: UIFont.boldSystemFont(ofSize: 24)
+                ]
+
+                let titleSize = title.size(withAttributes: titleAttr)
+
+                title.draw(
+                    at: CGPoint(
+                        x: (pageRect.width - titleSize.width) / 2,
+                        y: 20
+                    ),
+                    withAttributes: titleAttr
+                )
+
+                // Subtitle
+                let subtitle = ""
+                let subtitleAttr: [NSAttributedString.Key: Any] = [
+                    .font: UIFont.systemFont(ofSize: 18)
+                ]
+
+                let subtitleSize = subtitle.size(withAttributes: subtitleAttr)
+
+                subtitle.draw(
+                    at: CGPoint(
+                        x: (pageRect.width - subtitleSize.width) / 2,
+                        y: 55
+                    ),
+                    withAttributes: subtitleAttr
+                )
+
+                // imgBGView
+                let top: CGFloat = 100
+
+                let scale = min(
+                    (pageRect.width - 40) / image.size.width,
+                    (pageRect.height - top - 20) / image.size.height
+                )
+
+                let width = image.size.width * scale
+                let height = image.size.height * scale
+
+                image.draw(in: CGRect(
+                    x: (pageRect.width - width) / 2,
+                    y: top,
+                    width: width,
+                    height: height
+                ))
+            }
+
+            return pdfURL
+
+        } catch {
+
+            print(error)
+            return nil
+        }
+    }
+    
+    @IBAction func pdfTapBtn(_ sender: UIButton) {
+
+        guard let pdfURL = createPDF() else { return }
+
+        let activityVC = UIActivityViewController(
+            activityItems: [pdfURL],
+            applicationActivities: nil
+        )
+
+        if let popover = activityVC.popoverPresentationController {
+            popover.sourceView = sender
+        }
+
+        present(activityVC, animated: true)
+    }
+    
 }

@@ -158,7 +158,7 @@ class PuzzleCategoryMenuVC: BaseViewController {
     
     @IBAction func level2TapBtn(_ sender: UIButton) {
 
-      //  guard checkSubscription() else { return }
+        guard checkSubscription() else { return }
 
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
 
@@ -178,7 +178,7 @@ class PuzzleCategoryMenuVC: BaseViewController {
 
     @IBAction func level3TapBtn(_ sender: UIButton) {
 
-     //   guard checkSubscription() else { return }
+        guard checkSubscription() else { return }
 
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
 

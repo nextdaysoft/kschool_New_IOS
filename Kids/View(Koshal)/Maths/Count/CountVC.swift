@@ -53,8 +53,6 @@ class CountVC: BaseViewController {
     @IBOutlet weak var nextAndSubimtTapbtn: UIButton!
     
     @IBOutlet weak var titelLbl: UILabel!
-    
-    
     @IBOutlet weak var imgName: UILabel!
     
     var isHiddenView = false
@@ -315,13 +313,147 @@ class CountVC: BaseViewController {
         self.navigationController?.popViewController(animated: true)
     }
     
-//    @objc func selectTotal() {
-//        if !isAnswered {
-//            updateSelectionUI()
-//        }
-//    }
+    func createPDF() -> URL? {
+
+        let pdfURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("CountObjects.pdf")
+
+        view.layoutIfNeeded()
+
+        let hiddenViews: [(UIView, Bool)] = [
+            (HeaderView, HeaderView.isHidden),
+            (statusView, statusView.isHidden),
+            (backBtn, backBtn.isHidden),
+            (questionLbl, questionLbl.isHidden),
+            (scoreLblBGView, scoreLblBGView.isHidden),
+            (nextAndSubimtTapbtn, nextAndSubimtTapbtn.isHidden),
+            (btn0, btn0.isHidden),
+            (btn1, btn1.isHidden),
+            (btn2, btn2.isHidden),
+            (btn3, btn3.isHidden),
+            (btn4, btn4.isHidden),
+            (btn5, btn5.isHidden),
+            (btn6, btn6.isHidden),
+            (btn7, btn7.isHidden),
+            (btn8, btn8.isHidden),
+            (btn9, btn9.isHidden),
+            (btnX, btnX.isHidden),
+            (pdfBtn, pdfBtn.isHidden),
+            (rightOrWrongImg, rightOrWrongImg.isHidden)
+        ]
+
+        hiddenViews.forEach { $0.0.isHidden = true }
+
+        view.layoutIfNeeded()
+
+        let captureViews: [UIView] = [
+            firstView,
+            secondView,
+            totalLblBGView
+        ]
+
+        guard let first = captureViews.first else { return nil }
+
+        var captureRect = first.superview!.convert(first.frame, to: view)
+
+        for v in captureViews.dropFirst() {
+            let rect = v.superview!.convert(v.frame, to: view)
+            captureRect = captureRect.union(rect)
+        }
+
+        captureRect = captureRect.insetBy(dx: -20, dy: -20)
+
+        let renderer = UIGraphicsImageRenderer(size: captureRect.size)
+
+        let image = renderer.image { _ in
+
+            self.view.drawHierarchy(
+                in: CGRect(
+                    x: -captureRect.origin.x,
+                    y: -captureRect.origin.y,
+                    width: self.view.bounds.width,
+                    height: self.view.bounds.height
+                ),
+                afterScreenUpdates: true
+            )
+        }
+
+        hiddenViews.forEach {
+            $0.0.isHidden = $0.1
+        }
+
+        let pageWidth: CGFloat = 595
+        let pageHeight: CGFloat = 842
+
+        let pdfRenderer = UIGraphicsPDFRenderer(
+            bounds: CGRect(x: 0, y: 0, width: pageWidth, height: pageHeight)
+        )
+
+        do {
+
+            try pdfRenderer.writePDF(to: pdfURL) { context in
+
+                context.beginPage()
+
+                let title = imgName.text ?? "Count Objects"
+
+                title.draw(
+                    in: CGRect(
+                        x: 20,
+                        y: 20,
+                        width: pageWidth - 40,
+                        height: 35
+                    ),
+                    withAttributes: [
+                        .font: UIFont.boldSystemFont(ofSize: 24),
+                        .foregroundColor: UIColor.black
+                    ]
+                )
+
+                let maxWidth = pageWidth - 40
+                let maxHeight = pageHeight - 100
+
+                let scale = min(
+                    maxWidth / image.size.width,
+                    maxHeight / image.size.height
+                )
+
+                let width = image.size.width * scale
+                let height = image.size.height * scale
+
+                image.draw(
+                    in: CGRect(
+                        x: (pageWidth - width) / 2,
+                        y: 80,
+                        width: width,
+                        height: height
+                    )
+                )
+            }
+
+            return pdfURL
+
+        } catch {
+
+            print(error)
+            return nil
+        }
+    }
     
     @IBAction func pdfTapBtn(_ sender: UIButton) {
+
+        guard let url = createPDF() else { return }
+
+        let activityVC = UIActivityViewController(
+            activityItems: [url],
+            applicationActivities: nil
+        )
+
+        if let pop = activityVC.popoverPresentationController {
+            pop.sourceView = sender
+        }
+
+        present(activityVC, animated: true)
     }
 
     @IBAction func btn1(_ sender: UIButton) { appendNumber("1") }

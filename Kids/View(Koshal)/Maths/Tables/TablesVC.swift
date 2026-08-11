@@ -21,6 +21,8 @@ class TablesVC: BaseViewController {
     @IBOutlet weak var speakAndPlayBtn: UIButton!
     @IBOutlet weak var undoBtn: UIButton!
     
+    @IBOutlet weak var pdfBtn: UIButton!
+    
     // MARK: Variable
     var tableItems: [TableItem] = []
     var answers: [Int] = []
@@ -101,13 +103,8 @@ class TablesVC: BaseViewController {
             ststusView.backgroundColor = .white
 
             resetBtn.backgroundColor = .white
-            resetBtn.setTitleColor(.black, for: .normal)
-
             speakAndPlayBtn.backgroundColor = .white
-            speakAndPlayBtn.setTitleColor(.black, for: .normal)
-
             undoBtn.backgroundColor = .white
-            undoBtn.setTitleColor(.black, for: .normal)
 
         } else {
 
@@ -117,13 +114,8 @@ class TablesVC: BaseViewController {
             ststusView.backgroundColor = color
 
             resetBtn.backgroundColor = color
-            resetBtn.setTitleColor(.white, for: .normal)
-
             speakAndPlayBtn.backgroundColor = color
-            speakAndPlayBtn.setTitleColor(.white, for: .normal)
-
             undoBtn.backgroundColor = color
-            undoBtn.setTitleColor(.white, for: .normal)
         }
     }
     
@@ -468,6 +460,131 @@ class TablesVC: BaseViewController {
         // ✅ mark completed
         UserDefaults.standard.set(true, forKey: "tablesLevel\(currentTable)Completed")
     }
+    
+    func createPDF() -> URL? {
+
+        let pdfURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("Tables.pdf")
+
+        view.layoutIfNeeded()
+        tblView.layoutIfNeeded()
+
+        // ✅ Hide bottom answer collection
+        let collectionHidden = collView.isHidden
+        collView.isHidden = true
+
+        // ✅ Capture only table till last row
+        let lastRowRect = tblView.rectForRow(
+            at: IndexPath(row: tableItems.count - 1, section: 0)
+        )
+
+        let captureHeight = lastRowRect.maxY
+
+        let renderer = UIGraphicsImageRenderer(
+            size: CGSize(
+                width: tblView.bounds.width,
+                height: captureHeight
+            )
+        )
+
+        let image = renderer.image { context in
+
+            let previousOffset = tblView.contentOffset
+
+            tblView.contentOffset = .zero
+
+            context.cgContext.translateBy(x: 0, y: -tblView.contentOffset.y)
+
+            // ✅ Only UITableView render
+            tblView.layer.render(in: context.cgContext)
+
+            tblView.contentOffset = previousOffset
+        }
+
+        // ✅ Restore collection view
+        collView.isHidden = collectionHidden
+
+        let pageWidth: CGFloat = 595
+        let pageHeight: CGFloat = 842
+
+        let pdfRenderer = UIGraphicsPDFRenderer(
+            bounds: CGRect(
+                x: 0,
+                y: 0,
+                width: pageWidth,
+                height: pageHeight
+            )
+        )
+
+        do {
+
+            try pdfRenderer.writePDF(to: pdfURL) { context in
+
+                context.beginPage()
+
+                let title = "\(currentTable) Times Table"
+
+                title.draw(
+                    in: CGRect(
+                        x: 20,
+                        y: 20,
+                        width: pageWidth - 40,
+                        height: 35
+                    ),
+                    withAttributes: [
+                        .font: UIFont.boldSystemFont(ofSize: 24),
+                        .foregroundColor: UIColor.black
+                    ]
+                )
+
+                let maxWidth = pageWidth - 40
+                let maxHeight = pageHeight - 90
+
+                let scale = min(
+                    maxWidth / image.size.width,
+                    maxHeight / image.size.height
+                )
+
+                let drawWidth = image.size.width * scale
+                let drawHeight = image.size.height * scale
+
+                image.draw(
+                    in: CGRect(
+                        x: (pageWidth - drawWidth) / 2,
+                        y: 70,
+                        width: drawWidth,
+                        height: drawHeight
+                    )
+                )
+            }
+
+            return pdfURL
+
+        } catch {
+
+            print(error)
+            collView.isHidden = collectionHidden
+            return nil
+        }
+    }
+    
+    
+    @IBAction func pdfTapBtn(_ sender: UIButton) {
+
+        guard let url = createPDF() else { return }
+
+        let activityVC = UIActivityViewController(
+            activityItems: [url],
+            applicationActivities: nil
+        )
+
+        if let pop = activityVC.popoverPresentationController {
+            pop.sourceView = sender
+        }
+
+        present(activityVC, animated: true)
+    }
+    
 }
 // MARK: Extension
 extension TablesVC: UITableViewDataSource {

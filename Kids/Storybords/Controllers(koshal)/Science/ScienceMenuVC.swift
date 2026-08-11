@@ -368,9 +368,6 @@ class ScienceMenuVC: BaseViewController {
             HeaderView.backgroundColor = .white
             statusView.backgroundColor = .white
 
-            learningView.backgroundColor = .white
-            quizView.backgroundColor = .white
-
             bgViews.forEach {
                 $0?.backgroundColor = .white
             }
@@ -381,10 +378,7 @@ class ScienceMenuVC: BaseViewController {
 
             HeaderView.backgroundColor = color
             statusView.backgroundColor = color
-
-            learningView.backgroundColor = ColorManager.randomColor()
-            quizView.backgroundColor = ColorManager.randomColor()
-
+            
             bgViews.forEach {
                 $0?.backgroundColor = ColorManager.randomColor()
             }

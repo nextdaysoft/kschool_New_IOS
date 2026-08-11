@@ -45,6 +45,8 @@ class FishVC: BaseViewController {
     @IBOutlet weak var HeaderView: UIView!
     @IBOutlet weak var statusView: UIView!
     
+    @IBOutlet weak var pdfBtn: UIButton!
+    
     var questions: [FishQuestion] = [
 
         FishQuestion(
@@ -173,11 +175,6 @@ class FishVC: BaseViewController {
             statusView.backgroundColor = .white
 
             nextBtn.backgroundColor = .white
-            nextBtn.setTitleColor(.black, for: .normal)
-
-            scoreLabelBGView.backgroundColor = .white
-            topBGView.backgroundColor = .white
-            imgBGView.backgroundColor = .white
 
         } else {
 
@@ -187,11 +184,6 @@ class FishVC: BaseViewController {
             statusView.backgroundColor = color
 
             nextBtn.backgroundColor = color
-            nextBtn.setTitleColor(.white, for: .normal)
-
-            scoreLabelBGView.backgroundColor = color
-            topBGView.backgroundColor = ColorManager.randomColor()
-            imgBGView.backgroundColor = ColorManager.randomColor()
         }
     }
     
@@ -203,23 +195,20 @@ class FishVC: BaseViewController {
             nama2Btn.backgroundColor = .white
             nama3Btn.backgroundColor = .white
 
-            nama1Btn.setTitleColor(.black, for: .normal)
-            nama2Btn.setTitleColor(.black, for: .normal)
-            nama3Btn.setTitleColor(.black, for: .normal)
-
         } else {
 
             nama1Btn.backgroundColor = ColorManager.randomColor()
             nama2Btn.backgroundColor = ColorManager.randomColor()
             nama3Btn.backgroundColor = ColorManager.randomColor()
-
-            nama1Btn.setTitleColor(.white, for: .normal)
-            nama2Btn.setTitleColor(.white, for: .normal)
-            nama3Btn.setTitleColor(.white, for: .normal)
         }
 
+        // ✅ Text hamesha black
+        nama1Btn.setTitleColor(.black, for: .normal)
+        nama2Btn.setTitleColor(.black, for: .normal)
+        nama3Btn.setTitleColor(.black, for: .normal)
+
         defaultBGColor = nama1Btn.backgroundColor
-        defaultTextColor = nama1Btn.titleColor(for: .normal)
+        defaultTextColor = .black
     }
 
     
@@ -289,6 +278,66 @@ class FishVC: BaseViewController {
         nextBtn.isHidden = false
     }
 
+    func createPDF() -> URL? {
+
+        let pdfURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("Fish Reading.pdf")
+
+        let hiddenViews = [
+            HeaderView,
+            statusView,
+            scoreLabelBGView,
+            nextBtn
+        ]
+
+        hiddenViews.forEach { $0?.isHidden = true }
+
+        view.layoutIfNeeded()
+
+        let renderer = UIGraphicsImageRenderer(size: view.bounds.size)
+
+        let image = renderer.image { _ in
+            view.drawHierarchy(in: view.bounds, afterScreenUpdates: true)
+        }
+
+        hiddenViews.forEach { $0?.isHidden = false }
+
+        let pageRect = CGRect(x: 0, y: 0, width: 595, height: 842)
+
+        let pdfRenderer = UIGraphicsPDFRenderer(bounds: pageRect)
+
+        do {
+
+            try pdfRenderer.writePDF(to: pdfURL) { context in
+
+                context.beginPage()
+
+                let scale = min(
+                    pageRect.width / image.size.width,
+                    pageRect.height / image.size.height
+                )
+
+                let width = image.size.width * scale
+                let height = image.size.height * scale
+
+                let rect = CGRect(
+                    x: (pageRect.width - width) / 2,
+                    y: (pageRect.height - height) / 2,
+                    width: width,
+                    height: height
+                )
+
+                image.draw(in: rect)
+            }
+
+            return pdfURL
+
+        } catch {
+            print(error)
+            return nil
+        }
+    }
+    
     @IBAction func backBtnAction(_ sender: Any) {
         self.navigationController?.popViewController(animated: true)
     }
@@ -335,5 +384,22 @@ class FishVC: BaseViewController {
         }
     }
 
+    @IBAction func pdfTapBtn(_ sender: UIButton) {
+
+        guard let pdfURL = createPDF() else { return }
+
+        let activityVC = UIActivityViewController(
+            activityItems: [pdfURL],
+            applicationActivities: nil
+        )
+
+        if let popover = activityVC.popoverPresentationController {
+            popover.sourceView = sender
+        }
+
+        present(activityVC, animated: true)
+    }
+    
+    
 }
 

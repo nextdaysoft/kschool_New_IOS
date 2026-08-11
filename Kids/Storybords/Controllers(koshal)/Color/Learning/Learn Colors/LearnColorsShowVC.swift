@@ -21,8 +21,11 @@ class LearnColorsShowVC: BaseViewController,AVSpeechSynthesizerDelegate {
     @IBOutlet weak var repeatBtn: UIButton!
     
     @IBOutlet weak var allViewDrop: UIView!
-    
     @IBOutlet weak var LevelLabel: UILabel!
+    
+    
+    @IBOutlet weak var pdfBtn: UIButton!
+    
     
     var colors: [LearnColorItem] = []
     
@@ -678,6 +681,148 @@ class LearnColorsShowVC: BaseViewController,AVSpeechSynthesizerDelegate {
         imgBGView.layer.borderColor = randomColor.cgColor
     }
     
+    func createColorsPDF() -> URL? {
+
+        let pdfURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("LearnColors.pdf")
+
+        let pageWidth: CGFloat = 595
+        let pageHeight: CGFloat = 842
+
+        let renderer = UIGraphicsPDFRenderer(
+            bounds: CGRect(x: 0, y: 0, width: pageWidth, height: pageHeight)
+        )
+
+        do {
+
+            try renderer.writePDF(to: pdfURL) { context in
+
+                context.beginPage()
+
+                // Title
+                let title = "Learn Colors"
+
+                let titleAttributes: [NSAttributedString.Key: Any] = [
+                    .font: UIFont.boldSystemFont(ofSize: 30),
+                    .foregroundColor: UIColor.black
+                ]
+
+                let titleSize = title.size(withAttributes: titleAttributes)
+
+                title.draw(
+                    at: CGPoint(
+                        x: (pageWidth - titleSize.width) / 2,
+                        y: 30
+                    ),
+                    withAttributes: titleAttributes
+                )
+
+                let cardWidth: CGFloat = 220
+                let cardHeight: CGFloat = 180
+
+                let startX: CGFloat = 50
+                let spacingX: CGFloat = 30
+
+                var xPos = startX
+                var yPos: CGFloat = 100
+
+                for (index, item) in colors.enumerated() {
+
+                    let cardRect = CGRect(
+                        x: xPos,
+                        y: yPos,
+                        width: cardWidth,
+                        height: cardHeight
+                    )
+
+                    // Card
+                    let bgPath = UIBezierPath(
+                        roundedRect: cardRect,
+                        cornerRadius: 12
+                    )
+
+                    UIColor.white.setFill()
+                    bgPath.fill()
+
+                    UIColor.lightGray.setStroke()
+                    bgPath.lineWidth = 1
+                    bgPath.stroke()
+
+                    // Color Preview
+                    let colorRect = CGRect(
+                        x: cardRect.minX + 20,
+                        y: cardRect.minY + 15,
+                        width: cardWidth - 40,
+                        height: 95
+                    )
+
+                    item.color.setFill()
+                    UIBezierPath(
+                        roundedRect: colorRect,
+                        cornerRadius: 8
+                    ).fill()
+
+                    // Bottom Bar
+                    let barRect = CGRect(
+                        x: cardRect.minX,
+                        y: cardRect.maxY - 55,
+                        width: cardWidth,
+                        height: 55
+                    )
+
+                    ColorManager.randomColor().setFill()
+                    UIBezierPath(rect: barRect).fill()
+
+                    // Color Name
+                    let paragraph = NSMutableParagraphStyle()
+                    paragraph.alignment = .center
+
+                    let attrs: [NSAttributedString.Key: Any] = [
+                        .font: UIFont.boldSystemFont(ofSize: 16),
+                        .foregroundColor: UIColor.black,
+                        .paragraphStyle: paragraph
+                    ]
+
+                    (item.name as NSString).draw(
+                        in: CGRect(
+                            x: barRect.minX + 8,
+                            y: barRect.minY + 12,
+                            width: barRect.width - 16,
+                            height: 30
+                        ),
+                        withAttributes: attrs
+                    )
+
+                    // Next Position
+                    if index % 2 == 0 {
+
+                        xPos += cardWidth + spacingX
+
+                    } else {
+
+                        xPos = startX
+                        yPos += cardHeight + 20
+                    }
+
+                    // New Page
+                    if yPos > pageHeight - 220 {
+
+                        context.beginPage()
+
+                        yPos = 100
+                        xPos = startX
+                    }
+                }
+            }
+
+            return pdfURL
+
+        } catch {
+
+            print(error)
+            return nil
+        }
+    }
     
     @IBAction func repeatTapBtn(_ sender: UIButton) {
         speak(text: colors[currentIndex].name)
@@ -687,5 +832,21 @@ class LearnColorsShowVC: BaseViewController,AVSpeechSynthesizerDelegate {
         self.navigationController?.popViewController(animated: true)
     }
     
- 
+    
+    @IBAction func pdfTapBtn(_ sender: UIButton) {
+
+        guard let pdfURL = createColorsPDF() else { return }
+
+        let activityVC = UIActivityViewController(
+            activityItems: [pdfURL],
+            applicationActivities: nil
+        )
+
+        if let popover = activityVC.popoverPresentationController {
+            popover.sourceView = sender
+        }
+
+        present(activityVC, animated: true)
+    }
+    
 }

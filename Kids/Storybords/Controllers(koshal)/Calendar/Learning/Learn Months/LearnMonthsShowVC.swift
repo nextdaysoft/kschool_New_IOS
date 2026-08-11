@@ -21,6 +21,7 @@ class LearnMonthsShowVC: BaseViewController,AVSpeechSynthesizerDelegate {
     
     @IBOutlet weak var allViewDrop: UIView!
     
+    @IBOutlet weak var pdfBtn: UIButton!
     
     let months: [String] = [
         "January",
@@ -508,6 +509,7 @@ class LearnMonthsShowVC: BaseViewController,AVSpeechSynthesizerDelegate {
         backBtn.tintColor = #colorLiteral(red: 0.1718951762, green: 0.212508589, blue: 0.3281655014, alpha: 1)
         HeaderView.backgroundColor = color
         statusView.backgroundColor = color
+      
     }
     
     func speak(text: String) {
@@ -664,6 +666,131 @@ class LearnMonthsShowVC: BaseViewController,AVSpeechSynthesizerDelegate {
         imgBGView.layer.borderColor = randomColor.cgColor
     }
     
+    func createMonthsPDF() -> URL? {
+
+        let pdfURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("LearnMonths.pdf")
+
+        let pageWidth: CGFloat = 595
+        let pageHeight: CGFloat = 842
+
+        let renderer = UIGraphicsPDFRenderer(
+            bounds: CGRect(x: 0, y: 0, width: pageWidth, height: pageHeight)
+        )
+
+        do {
+
+            try renderer.writePDF(to: pdfURL) { context in
+
+                context.beginPage()
+
+                // Title
+                let title = "Learn Months"
+
+                let titleAttributes: [NSAttributedString.Key: Any] = [
+                    .font: UIFont.boldSystemFont(ofSize: 30),
+                    .foregroundColor: UIColor.black
+                ]
+
+                let titleSize = title.size(withAttributes: titleAttributes)
+
+                title.draw(
+                    at: CGPoint(
+                        x: (pageWidth - titleSize.width) / 2,
+                        y: 30
+                    ),
+                    withAttributes: titleAttributes
+                )
+
+                let cardWidth: CGFloat = 220
+                let cardHeight: CGFloat = 120
+
+                let startX: CGFloat = 50
+                let spacingX: CGFloat = 30
+
+                var xPos = startX
+                var yPos: CGFloat = 100
+
+                for (index, month) in months.enumerated() {
+
+                    let cardRect = CGRect(
+                        x: xPos,
+                        y: yPos,
+                        width: cardWidth,
+                        height: cardHeight
+                    )
+
+                    // Card Background
+                    let bgPath = UIBezierPath(
+                        roundedRect: cardRect,
+                        cornerRadius: 12
+                    )
+
+                    UIColor.white.setFill()
+                    bgPath.fill()
+
+                    UIColor.lightGray.setStroke()
+                    bgPath.lineWidth = 1
+                    bgPath.stroke()
+
+                    // Color Bar
+                    let barRect = CGRect(
+                        x: cardRect.minX,
+                        y: cardRect.minY,
+                        width: cardWidth,
+                        height: cardHeight
+                    )
+
+                    ColorManager.randomColor().setFill()
+                    UIBezierPath(rect: barRect).fill()
+
+                    // Month Name
+                    let paragraphStyle = NSMutableParagraphStyle()
+                    paragraphStyle.alignment = .center
+
+                    let attrs: [NSAttributedString.Key: Any] = [
+                        .font: UIFont.boldSystemFont(ofSize: 22),
+                        .foregroundColor: UIColor.black,
+                        .paragraphStyle: paragraphStyle
+                    ]
+
+                    let textRect = CGRect(
+                        x: barRect.minX + 10,
+                        y: barRect.minY + 35,
+                        width: barRect.width - 20,
+                        height: 50
+                    )
+
+                    (month as NSString).draw(
+                        in: textRect,
+                        withAttributes: attrs
+                    )
+
+                    // Next Position
+                    if index % 2 == 0 {
+                        xPos += cardWidth + spacingX
+                    } else {
+                        xPos = startX
+                        yPos += cardHeight + 20
+                    }
+
+                    // New Page
+                    if yPos > pageHeight - 160 {
+                        context.beginPage()
+                        yPos = 100
+                        xPos = startX
+                    }
+                }
+            }
+
+            return pdfURL
+
+        } catch {
+
+            print(error)
+            return nil
+        }
+    }
     
     @IBAction func repeatTapBtn(_ sender: UIButton) {
         speak(text: months[currentIndex])
@@ -673,5 +800,20 @@ class LearnMonthsShowVC: BaseViewController,AVSpeechSynthesizerDelegate {
         self.navigationController?.popViewController(animated: true)
     }
     
+    @IBAction func pdfTapBtn(_ sender: UIButton) {
+
+        guard let pdfURL = createMonthsPDF() else { return }
+
+        let activityVC = UIActivityViewController(
+            activityItems: [pdfURL],
+            applicationActivities: nil
+        )
+
+        if let popover = activityVC.popoverPresentationController {
+            popover.sourceView = sender
+        }
+
+        present(activityVC, animated: true)
+    }
  
 }
